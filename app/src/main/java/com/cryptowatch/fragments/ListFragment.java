@@ -13,20 +13,20 @@ import android.view.ViewGroup;
 
 import com.cryptowatch.R;
 import com.cryptowatch.adapters.CryptocurrencyRecyclerViewAdapter;
-import com.cryptowatch.interfaces.CryptocurrencyClickListener;
+import com.cryptowatch.interfaces.ListClickListener;
 import com.cryptowatch.models.Cryptocurrency;
 import com.cryptowatch.viewmodels.AppViewModel;
 
-public class CryptocurrencyFragment extends Fragment implements CryptocurrencyClickListener {
+public class ListFragment extends Fragment implements ListClickListener {
 
     private AppViewModel viewModel;
 
-    public CryptocurrencyFragment() {
+    public ListFragment() {
         // Required empty public constructor
     }
 
-    public static CryptocurrencyFragment newInstance() {
-        return new CryptocurrencyFragment();
+    public static ListFragment newInstance() {
+        return new ListFragment();
     }
 
     @Override
@@ -38,7 +38,7 @@ public class CryptocurrencyFragment extends Fragment implements CryptocurrencyCl
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_cryptocurrency, container, false);
+        View view = inflater.inflate(R.layout.fragment_list, container, false);
         RecyclerView recyclerView = view.findViewById(R.id.cryptocurrencyRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         viewModel.getData().observe(getViewLifecycleOwner(), data -> {

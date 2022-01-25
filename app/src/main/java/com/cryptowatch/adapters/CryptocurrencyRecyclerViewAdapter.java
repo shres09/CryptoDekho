@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import com.cryptowatch.R;
-import com.cryptowatch.interfaces.CryptocurrencyClickListener;
+import com.cryptowatch.interfaces.ListClickListener;
 import com.cryptowatch.models.Cryptocurrency;
 
 public class CryptocurrencyRecyclerViewAdapter
@@ -20,9 +20,9 @@ public class CryptocurrencyRecyclerViewAdapter
 
     private final LayoutInflater inflater;
     private final List<Cryptocurrency> data;
-    private final CryptocurrencyClickListener clickListener;
+    private final ListClickListener clickListener;
 
-    public CryptocurrencyRecyclerViewAdapter(Context context, List<Cryptocurrency> data, CryptocurrencyClickListener clickListener) {
+    public CryptocurrencyRecyclerViewAdapter(Context context, List<Cryptocurrency> data, ListClickListener clickListener) {
         this.inflater = LayoutInflater.from(context);
         this.data = data;
         this.clickListener = clickListener;
@@ -38,7 +38,7 @@ public class CryptocurrencyRecyclerViewAdapter
     @Override
     public void onBindViewHolder(@NonNull CryptocurrencyViewHolder holder, int position) {
         Cryptocurrency cryptocurrency = data.get(position);
-        holder.getId().setText(String.valueOf(cryptocurrency.getId()));
+        holder.getId().setText(cryptocurrency.getId());
         holder.getName().setText(cryptocurrency.getName());
     }
 
@@ -48,7 +48,6 @@ public class CryptocurrencyRecyclerViewAdapter
     }
 
     public class CryptocurrencyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-
         private TextView id;
         private TextView name;
 
@@ -81,5 +80,4 @@ public class CryptocurrencyRecyclerViewAdapter
             clickListener.onCurrencyClick(cryptocurrency);
         }
     }
-
 }

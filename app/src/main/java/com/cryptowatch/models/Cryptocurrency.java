@@ -1,31 +1,27 @@
 package com.cryptowatch.models;
 
-import com.google.gson.annotations.SerializedName;
-
 public class Cryptocurrency {
-
-    @SerializedName("id")
-    private int id;
-    @SerializedName("name")
+    private String id;
     private String name;
-    @SerializedName("symbol")
-    private String symbol;
+    private String image;
+    private double price;
 
     public Cryptocurrency() {
 
     }
 
-    public Cryptocurrency(int id, String name, String symbol) {
+    public Cryptocurrency(String id, String name, String image, double price) {
         this.id = id;
         this.name = name;
-        this.symbol = symbol;
+        this.image = image;
+        this.price = price;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -37,12 +33,19 @@ public class Cryptocurrency {
         this.name = name;
     }
 
-    public String getSymbol() {
-        return symbol;
+    public String getImage() {
+        return image;
     }
 
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
+    public void setImage(String image) {
+        this.image = image;
     }
 
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
 }

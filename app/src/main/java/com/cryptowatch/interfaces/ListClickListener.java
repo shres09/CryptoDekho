@@ -2,6 +2,6 @@ package com.cryptowatch.interfaces;
 
 import com.cryptowatch.models.Cryptocurrency;
 
-public interface CryptocurrencyClickListener {
+public interface ListClickListener {
     void onCurrencyClick(Cryptocurrency cryptocurrency);
 }
