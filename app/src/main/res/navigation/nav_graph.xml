@@ -3,14 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/list">
+    app:startDestination="@id/explore">
     <fragment
-        android:id="@+id/list"
+        android:id="@+id/explore"
         android:name="com.cryptowatch.fragments.ListFragment"
-        android:label="CryptocurrencyFragment" />
+        android:label="@string/explore" />
     <fragment
         android:id="@+id/detail"
         android:name="com.cryptowatch.fragments.DetailFragment"
-        android:label="fragment_detail"
+        android:label="NAME OF CURRENCY"
         tools:layout="@layout/fragment_detail" />
+    <fragment
+        android:id="@+id/news"
+        android:name="com.cryptowatch.fragments.NewsFragment"
+        android:label="@string/news" />
 </navigation>

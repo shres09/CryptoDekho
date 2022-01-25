@@ -1,16 +1,16 @@
 package com.cryptowatch.models;
 
-public class Cryptocurrency {
+public class Currency {
     private String id;
     private String name;
     private String image;
     private double price;
 
-    public Cryptocurrency() {
+    public Currency() {
 
     }
 
-    public Cryptocurrency(String id, String name, String image, double price) {
+    public Currency(String id, String name, String image, double price) {
         this.id = id;
         this.name = name;
         this.image = image;

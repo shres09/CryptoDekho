@@ -13,7 +13,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import com.cryptowatch.R;
 import com.cryptowatch.viewmodels.AppViewModel;
-import com.cryptowatch.models.Cryptocurrency;
+import com.cryptowatch.models.Currency;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,14 +32,14 @@ public class MainActivity extends AppCompatActivity {
         viewModel.getSelected().observe(this, this::navigate);
 
         BottomNavigationView nav = findViewById(R.id.navbar);
-        AppBarConfiguration abc = new AppBarConfiguration.Builder(R.id.list).build();
+        AppBarConfiguration abc = new AppBarConfiguration.Builder(R.id.explore, R.id.news).build();
         NavHostFragment nhf = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.navFragment);
         nvc = nhf.getNavController();
         NavigationUI.setupActionBarWithNavController(this, nvc, abc);
         NavigationUI.setupWithNavController(nav, nvc);
     }
 
-    protected void navigate(Cryptocurrency cryptocurrency) {
+    protected void navigate(Currency currency) {
         nvc.navigate(R.id.detail);
     }
 

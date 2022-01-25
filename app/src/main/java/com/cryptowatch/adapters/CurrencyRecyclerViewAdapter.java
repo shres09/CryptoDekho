@@ -12,17 +12,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import com.cryptowatch.R;
-import com.cryptowatch.interfaces.ListClickListener;
-import com.cryptowatch.models.Cryptocurrency;
+import com.cryptowatch.interfaces.CurrencyClickListener;
+import com.cryptowatch.models.Currency;
 
-public class CryptocurrencyRecyclerViewAdapter
-        extends RecyclerView.Adapter<CryptocurrencyRecyclerViewAdapter.CryptocurrencyViewHolder> {
+public class CurrencyRecyclerViewAdapter
+        extends RecyclerView.Adapter<CurrencyRecyclerViewAdapter.CurrencyViewHolder> {
 
     private final LayoutInflater inflater;
-    private final List<Cryptocurrency> data;
-    private final ListClickListener clickListener;
+    private final List<Currency> data;
+    private final CurrencyClickListener clickListener;
 
-    public CryptocurrencyRecyclerViewAdapter(Context context, List<Cryptocurrency> data, ListClickListener clickListener) {
+    public CurrencyRecyclerViewAdapter(Context context, List<Currency> data, CurrencyClickListener clickListener) {
         this.inflater = LayoutInflater.from(context);
         this.data = data;
         this.clickListener = clickListener;
@@ -30,16 +30,16 @@ public class CryptocurrencyRecyclerViewAdapter
 
     @NonNull
     @Override
-    public CryptocurrencyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public CurrencyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = inflater.inflate(R.layout.cryptocurrency_layout, parent, false);
-        return new CryptocurrencyViewHolder(view);
+        return new CurrencyViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull CryptocurrencyViewHolder holder, int position) {
-        Cryptocurrency cryptocurrency = data.get(position);
-        holder.getId().setText(cryptocurrency.getId());
-        holder.getName().setText(cryptocurrency.getName());
+    public void onBindViewHolder(@NonNull CurrencyViewHolder holder, int position) {
+        Currency currency = data.get(position);
+        holder.getId().setText(currency.getId());
+        holder.getName().setText(currency.getName());
     }
 
     @Override
@@ -47,11 +47,11 @@ public class CryptocurrencyRecyclerViewAdapter
         return data.size();
     }
 
-    public class CryptocurrencyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class CurrencyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private TextView id;
         private TextView name;
 
-        public CryptocurrencyViewHolder(View view) {
+        public CurrencyViewHolder(View view) {
             super(view);
             id = view.findViewById(R.id.labelId);
             name = view.findViewById(R.id.labelName);
@@ -76,8 +76,8 @@ public class CryptocurrencyRecyclerViewAdapter
 
         @Override
         public void onClick(View v) {
-            Cryptocurrency cryptocurrency = data.get(getAdapterPosition());
-            clickListener.onCurrencyClick(cryptocurrency);
+            Currency currency = data.get(getAdapterPosition());
+            clickListener.onCurrencyClick(currency);
         }
     }
 }

@@ -12,13 +12,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.cryptowatch.R;
-import com.cryptowatch.adapters.CryptocurrencyRecyclerViewAdapter;
-import com.cryptowatch.interfaces.ListClickListener;
-import com.cryptowatch.models.Cryptocurrency;
+import com.cryptowatch.adapters.CurrencyRecyclerViewAdapter;
+import com.cryptowatch.interfaces.CurrencyClickListener;
+import com.cryptowatch.models.Currency;
 import com.cryptowatch.viewmodels.AppViewModel;
 
-public class ListFragment extends Fragment implements ListClickListener {
-
+public class ListFragment extends Fragment implements CurrencyClickListener {
     private AppViewModel viewModel;
 
     public ListFragment() {
@@ -42,14 +41,13 @@ public class ListFragment extends Fragment implements ListClickListener {
         RecyclerView recyclerView = view.findViewById(R.id.cryptocurrencyRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         viewModel.getData().observe(getViewLifecycleOwner(), data -> {
-            recyclerView.setAdapter(new CryptocurrencyRecyclerViewAdapter(getContext(), data, this));
+            recyclerView.setAdapter(new CurrencyRecyclerViewAdapter(getContext(), data, this));
         });
         return view;
     }
 
     @Override
-    public void onCurrencyClick(Cryptocurrency cryptocurrency) {
-        viewModel.selectData(cryptocurrency);
+    public void onCurrencyClick(Currency currency) {
+        viewModel.selectData(currency);
     }
-
 }

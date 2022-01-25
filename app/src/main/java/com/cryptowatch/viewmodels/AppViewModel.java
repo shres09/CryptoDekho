@@ -13,19 +13,19 @@ import retrofit2.Response;
 import retrofit2.Call;
 
 import com.cryptowatch.api.CryptoCompareService;
-import com.cryptowatch.api.CryptoOhlcvDeserializer;
+import com.cryptowatch.api.OhlcListDeserializer;
 import com.cryptowatch.api.RetrofitClientInstance;
-import com.cryptowatch.api.CryptocurrencyListDeserializer;
-import com.cryptowatch.models.CryptoOhlcv;
-import com.cryptowatch.models.Cryptocurrency;
+import com.cryptowatch.api.CurrencyListDeserializer;
+import com.cryptowatch.models.Ohlc;
+import com.cryptowatch.models.Currency;
 import com.google.gson.reflect.TypeToken;
 
 public class AppViewModel extends ViewModel {
-    private MutableLiveData<List<Cryptocurrency>> data;
-    private MutableLiveData<Cryptocurrency> selected = new MutableLiveData<>();
-    private MutableLiveData<List<CryptoOhlcv>> ohlcv = new MutableLiveData<>();
+    private MutableLiveData<List<Currency>> data;
+    private MutableLiveData<Currency> selected = new MutableLiveData<>();
+    private MutableLiveData<List<Ohlc>> ohlcv = new MutableLiveData<>();
 
-    public LiveData<List<Cryptocurrency>> getData() {
+    public LiveData<List<Currency>> getData() {
         if (data == null) {
             data = new MutableLiveData<>();
             fetchData();
@@ -33,33 +33,33 @@ public class AppViewModel extends ViewModel {
         return data;
     }
 
-    public LiveData<Cryptocurrency> getSelected() {
+    public LiveData<Currency> getSelected() {
         return this.selected;
     }
 
-    public LiveData<List<CryptoOhlcv>> getOhlcv() { return this.ohlcv; }
+    public LiveData<List<Ohlc>> getOhlcv() { return this.ohlcv; }
 
-    public void selectData(Cryptocurrency cryptocurrency) {
-        this.selected.setValue(cryptocurrency);
+    public void selectData(Currency currency) {
+        this.selected.setValue(currency);
         fetchOhlcv();
     }
 
     // TODO: Move to repository/service
     protected void fetchData() {
         CryptoCompareService service = RetrofitClientInstance
-                .getRetrofitInstance(new TypeToken<List<Cryptocurrency>>() {}.getType(), new CryptocurrencyListDeserializer())
+                .getRetrofitInstance(new TypeToken<List<Currency>>() {}.getType(), new CurrencyListDeserializer())
                 .create(CryptoCompareService.class);
 
-        Call<List<Cryptocurrency>> getCurrencies = service.getToplistByMarketCap();
+        Call<List<Currency>> getCurrencies = service.getToplistByMarketCap();
 
-        getCurrencies.enqueue(new Callback<List<Cryptocurrency>>() {
+        getCurrencies.enqueue(new Callback<List<Currency>>() {
             @Override
-            public void onResponse(Call<List<Cryptocurrency>> call, Response<List<Cryptocurrency>> response) {
+            public void onResponse(Call<List<Currency>> call, Response<List<Currency>> response) {
                 data.postValue(response.body());
             }
 
             @Override
-            public void onFailure(Call<List<Cryptocurrency>> call, Throwable t) {
+            public void onFailure(Call<List<Currency>> call, Throwable t) {
                 Log.e("getTopListByMarketCap", t.getMessage());
             }
         });
@@ -68,19 +68,19 @@ public class AppViewModel extends ViewModel {
     // TODO: Move to repository/service
     protected void fetchOhlcv() {
         CryptoCompareService service = RetrofitClientInstance
-                .getRetrofitInstance(new TypeToken<List<CryptoOhlcv>>() {}.getType(), new CryptoOhlcvDeserializer())
+                .getRetrofitInstance(new TypeToken<List<Ohlc>>() {}.getType(), new OhlcListDeserializer())
                 .create(CryptoCompareService.class);
 
-        Call<List<CryptoOhlcv>> getOhlcv = service.getDailyOhlcv(selected.getValue().getId());
+        Call<List<Ohlc>> getOhlcv = service.getDailyOhlcv(selected.getValue().getId());
 
-        getOhlcv.enqueue(new Callback<List<CryptoOhlcv>>() {
+        getOhlcv.enqueue(new Callback<List<Ohlc>>() {
             @Override
-            public void onResponse(Call<List<CryptoOhlcv>> call, Response<List<CryptoOhlcv>> response) {
+            public void onResponse(Call<List<Ohlc>> call, Response<List<Ohlc>> response) {
                 ohlcv.postValue(response.body());
             }
 
             @Override
-            public void onFailure(Call<List<CryptoOhlcv>> call, Throwable t) {
+            public void onFailure(Call<List<Ohlc>> call, Throwable t) {
                 Log.e("fetchOhlcv", t.getMessage());
             }
         });

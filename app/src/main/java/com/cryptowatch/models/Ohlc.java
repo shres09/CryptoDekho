@@ -1,17 +1,17 @@
 package com.cryptowatch.models;
 
-public class CryptoOhlcv {
+public class Ohlc {
     private long time;
     private double open;
     private double high;
     private double low;
     private double close;
 
-    public CryptoOhlcv() {
+    public Ohlc() {
 
     }
 
-    public CryptoOhlcv(long time, double open, double high, double low, double close) {
+    public Ohlc(long time, double open, double high, double low, double close) {
         this.time = time;
         this.open = open;
         this.high = high;

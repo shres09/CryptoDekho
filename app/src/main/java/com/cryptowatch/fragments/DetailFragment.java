@@ -13,9 +13,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.cryptowatch.R;
-import com.cryptowatch.models.CryptoOhlcv;
-import com.cryptowatch.models.Cryptocurrency;
+import com.cryptowatch.models.Ohlc;
+import com.cryptowatch.models.Currency;
 import com.cryptowatch.viewmodels.AppViewModel;
+
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
@@ -52,18 +53,18 @@ public class DetailFragment extends Fragment {
         return view;
     }
 
-    private void renderInfo(ViewGroup container, Cryptocurrency cryptocurrency) {
+    private void renderInfo(ViewGroup container, Currency currency) {
         ((TextView) container.findViewById(R.id.labelDetailId))
-                .setText(cryptocurrency.getId());
+                .setText(currency.getId());
         ((TextView) container.findViewById(R.id.labelDetailName))
-                .setText(cryptocurrency.getName());
+                .setText(currency.getName());
     }
 
-    private void renderChart(ViewGroup container, List<CryptoOhlcv> ohlcv) {
+    private void renderChart(ViewGroup container, List<Ohlc> ohlcv) {
         LineChart chart = container.findViewById(R.id.lineChart);
 
         List<Entry> entries = new ArrayList<>();
-        for (CryptoOhlcv o : ohlcv) {
+        for (Ohlc o : ohlcv) {
             entries.add(new Entry(o.getTime(), (float) o.getClose())); // FIXME: change all to float?
         }
 
