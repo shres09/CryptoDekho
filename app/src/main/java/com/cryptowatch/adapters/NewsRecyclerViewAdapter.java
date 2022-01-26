@@ -1,8 +1,6 @@
 package com.cryptowatch.adapters;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,8 +38,8 @@ public class NewsRecyclerViewAdapter
     @Override
     public void onBindViewHolder(@NonNull NewsViewHolder holder, int position) {
         NewsArticle article = data.get(position);
-        holder.getTitle().setText(article.getTitle());
-        holder.getDescription().setText(article.getDescription());
+        holder.title.setText(article.getTitle());
+        holder.description.setText(article.getDescription());
     }
 
     @Override
@@ -49,32 +47,15 @@ public class NewsRecyclerViewAdapter
         return data.size();
     }
 
-    public class NewsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        // FIXME: maybe it doesnt have to be private
-        private TextView title;
-        private TextView description;
+    protected class NewsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        private final TextView title;
+        private final TextView description;
 
         public NewsViewHolder(View view) {
             super(view);
             title = view.findViewById(R.id.labelTitle);
             description = view.findViewById(R.id.labelDescription);
             view.setOnClickListener(this);
-        }
-
-        public TextView getTitle() {
-            return title;
-        }
-
-        public void setTitle(TextView title) {
-            this.title = title;
-        }
-
-        public TextView getDescription() {
-            return description;
-        }
-
-        public void setDescription(TextView description) {
-            this.description = description;
         }
 
         @Override

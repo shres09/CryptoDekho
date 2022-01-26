@@ -43,7 +43,7 @@ public class NewsFragment extends Fragment implements NewsClickListener {
         View view = inflater.inflate(R.layout.fragment_news, container, false);
         RecyclerView recyclerView = view.findViewById(R.id.newsRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        viewModel.getData().observe(getViewLifecycleOwner(), data -> {
+        viewModel.getNews().observe(getViewLifecycleOwner(), data -> {
             recyclerView.setAdapter(new NewsRecyclerViewAdapter(getContext(), data, this));
         });
         return view;

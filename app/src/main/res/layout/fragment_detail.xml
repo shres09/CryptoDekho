@@ -19,6 +19,12 @@
         android:layout_height="wrap_content"
         android:text="TextView" />
 
+    <Button
+        android:id="@+id/btnPortfolio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="add/remove portfolio" />
+
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/lineChart"
         android:layout_width="match_parent"

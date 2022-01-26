@@ -1,4 +1,4 @@
-package com.cryptowatch.api;
+package com.cryptowatch.network;
 
 import com.cryptowatch.models.Ohlc;
 import com.google.gson.JsonArray;
@@ -17,9 +17,9 @@ public class OhlcListDeserializer implements JsonDeserializer<List<Ohlc>> {
     public List<Ohlc> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         List<Ohlc> ohlcList = new ArrayList<>();
 
-        final JsonArray ohlcvArray = json.getAsJsonObject().getAsJsonObject("Data").getAsJsonArray("Data");
+        final JsonArray ohlcArray = json.getAsJsonObject().getAsJsonObject("Data").getAsJsonArray("Data");
 
-        for (JsonElement el : ohlcvArray) {
+        for (JsonElement el : ohlcArray) {
             final JsonObject ohlc = el.getAsJsonObject();
 
             ohlcList.add(new Ohlc(

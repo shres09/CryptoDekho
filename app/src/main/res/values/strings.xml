@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Cryptowatch</string>
     <string name="cryptocurrency">Cryptocurrency</string>
-    <string name="explore">Explore</string>
+    <string name="market">Market</string>
+    <string name="portfolio">Portfolio</string>
     <string name="news">News</string>
 </resources>

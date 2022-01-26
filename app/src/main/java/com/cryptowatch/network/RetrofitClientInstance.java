@@ -1,4 +1,4 @@
-package com.cryptowatch.api;
+package com.cryptowatch.network;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

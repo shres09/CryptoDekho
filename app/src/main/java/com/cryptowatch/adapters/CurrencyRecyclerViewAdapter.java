@@ -38,8 +38,9 @@ public class CurrencyRecyclerViewAdapter
     @Override
     public void onBindViewHolder(@NonNull CurrencyViewHolder holder, int position) {
         Currency currency = data.get(position);
-        holder.getId().setText(currency.getId());
-        holder.getName().setText(currency.getName());
+        holder.id.setText(currency.getId());
+        holder.name.setText(currency.getName());
+        holder.price.setText(String.valueOf(currency.getPrice()));
     }
 
     @Override
@@ -47,31 +48,17 @@ public class CurrencyRecyclerViewAdapter
         return data.size();
     }
 
-    public class CurrencyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private TextView id;
-        private TextView name;
+    protected class CurrencyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        private final TextView id;
+        private final TextView name;
+        private final TextView price;
 
         public CurrencyViewHolder(View view) {
             super(view);
             id = view.findViewById(R.id.labelId);
             name = view.findViewById(R.id.labelName);
+            price = view.findViewById(R.id.labelPrice);
             view.setOnClickListener(this);
-        }
-
-        public TextView getId() {
-            return id;
-        }
-
-        public void setId(TextView id) {
-            this.id = id;
-        }
-
-        public TextView getName() {
-            return name;
-        }
-
-        public void setName(TextView name) {
-            this.name = name;
         }
 
         @Override

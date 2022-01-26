@@ -12,17 +12,16 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Call;
 
-import com.cryptowatch.api.CryptoCompareService;
-import com.cryptowatch.api.NewsListDeserializer;
-import com.cryptowatch.api.RetrofitClientInstance;
-import com.cryptowatch.api.CurrencyListDeserializer;
+import com.cryptowatch.network.CryptoCompareService;
+import com.cryptowatch.network.NewsListDeserializer;
+import com.cryptowatch.network.RetrofitClientInstance;
 import com.cryptowatch.models.NewsArticle;
 import com.google.gson.reflect.TypeToken;
 
 public class NewsViewModel extends ViewModel {
     private MutableLiveData<List<NewsArticle>> news;
 
-    public LiveData<List<NewsArticle>> getData() {
+    public LiveData<List<NewsArticle>> getNews() {
         if (news == null) {
             news = new MutableLiveData<>();
             fetchNews();
@@ -41,7 +40,7 @@ public class NewsViewModel extends ViewModel {
         getNews.enqueue(new Callback<List<NewsArticle>>() {
             @Override
             public void onResponse(Call<List<NewsArticle>> call, Response<List<NewsArticle>> response) {
-                news.postValue(response.body());
+                news.setValue(response.body());
             }
 
             @Override

@@ -9,15 +9,16 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.cryptowatch.data.CurrencyRepository;
+import com.cryptowatch.data.Database;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import com.cryptowatch.R;
-import com.cryptowatch.viewmodels.AppViewModel;
+import com.cryptowatch.viewmodels.CurrencyViewModel;
 import com.cryptowatch.models.Currency;
 
 public class MainActivity extends AppCompatActivity {
-
-    private AppViewModel viewModel;
+    private CurrencyViewModel viewModel;
     private NavController nvc;
 
     @Override
@@ -28,11 +29,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void initComponents() {
-        viewModel = new ViewModelProvider(this).get(AppViewModel.class);
+        viewModel = new ViewModelProvider(this).get(CurrencyViewModel.class);
+        viewModel.setRepository(new CurrencyRepository(new Database(this)));
         viewModel.getSelected().observe(this, this::navigate);
 
         BottomNavigationView nav = findViewById(R.id.navbar);
-        AppBarConfiguration abc = new AppBarConfiguration.Builder(R.id.explore, R.id.news).build();
+        AppBarConfiguration abc = new AppBarConfiguration.Builder(R.id.market, R.id.portfolio, R.id.news).build();
         NavHostFragment nhf = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.navFragment);
         nvc = nhf.getNavController();
         NavigationUI.setupActionBarWithNavController(this, nvc, abc);

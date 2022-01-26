@@ -1,6 +1,9 @@
 package com.cryptowatch.models;
 
 public class Currency {
+    public static final String TABLE_NAME = "currency";
+    public static final String FIELD_ID = "id";
+
     private String id;
     private String name;
     private String image;
