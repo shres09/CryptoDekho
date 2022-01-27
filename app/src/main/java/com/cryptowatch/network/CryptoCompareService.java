@@ -24,7 +24,7 @@ public interface CryptoCompareService {
     Call<Currency> getCurrency(@Query("fsym") String id);
 
     @GET("pricemultifull?tsyms=EUR")
-    Call<Double[]> getCurrencyPrice(@Query("fsyms") String id);
+    Call<String[]> getCurrencyPrice(@Query("fsyms") String id);
 
     @GET("v2/histoday?&tsym=EUR&limit=10")
     Call<List<Ohlc>> getDailyOhlc(@Query("fsym") String id);

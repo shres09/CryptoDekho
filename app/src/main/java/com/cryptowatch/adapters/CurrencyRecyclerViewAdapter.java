@@ -1,6 +1,7 @@
 package com.cryptowatch.adapters;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,7 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -73,10 +75,15 @@ public class CurrencyRecyclerViewAdapter
     @Override
     public void onBindViewHolder(@NonNull CurrencyViewHolder holder, int position) {
         Currency currency = filteredList.get(position);
+        // FIXME: move to static string
+        Picasso.get().load("https://www.cryptocompare.com/" + currency.getImage()).into(holder.logo);
         holder.id.setText(currency.getId());
         holder.name.setText(currency.getName());
-        holder.price.setText(String.valueOf(currency.getPrice()));
-        Picasso.get().load("https://www.cryptocompare.com/" + currency.getImage()).into(holder.logo);
+        holder.price.setText(currency.getPrice());
+        holder.marketCap.setText("MCap " + currency.getMarketCap());
+        holder.percentChange.setText(currency.getPercentChange() + "%");
+        holder.percentChange.setTextColor((currency.getPercentChange().contains("-")) ? Color.RED : Color.GREEN);
+        holder.portfolio.setChecked(currency.isInPortfolio());
     }
 
     @Override
@@ -89,25 +96,42 @@ public class CurrencyRecyclerViewAdapter
         return filter;
     }
 
-    protected class CurrencyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    protected class CurrencyViewHolder extends RecyclerView.ViewHolder {
         private final ImageView logo;
         private final TextView id;
         private final TextView name;
         private final TextView price;
+        private final TextView marketCap;
+        private final TextView percentChange;
+        private final ToggleButton portfolio;
 
         public CurrencyViewHolder(View view) {
             super(view);
+
             logo = view.findViewById(R.id.imageCurrency);
             id = view.findViewById(R.id.labelId);
             name = view.findViewById(R.id.labelName);
             price = view.findViewById(R.id.labelPrice);
-            view.setOnClickListener(this);
+            marketCap = view.findViewById(R.id.labelMarketCap);
+            percentChange = view.findViewById(R.id.labelPercentChange);
+            portfolio = view.findViewById(R.id.btnPortfolio);
+
+            setupViewClick(view);
+            setupPortfolioClick(portfolio);
         }
 
-        @Override
-        public void onClick(View v) {
-            Currency currency = list.get(getAdapterPosition());
-            clickListener.onCurrencyClick(currency);
+        public void setupViewClick(View view) {
+            view.setOnClickListener(v -> {
+                Currency currency = filteredList.get(getAdapterPosition());
+                clickListener.onCurrencyClick(currency);
+            });
+        }
+
+        public void setupPortfolioClick(ToggleButton portfolio) {
+            portfolio.setOnClickListener(v -> {
+                Currency currency = filteredList.get(getAdapterPosition());
+                clickListener.onPortfolioClick(currency);
+            });
         }
     }
 }

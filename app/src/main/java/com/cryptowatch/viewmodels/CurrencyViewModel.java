@@ -60,19 +60,29 @@ public class CurrencyViewModel extends ViewModel {
 
     public LiveData<List<Ohlc>> getOhlc() { return this.ohlc; }
 
+    public void handlePortfolioChange(Currency currency) {
+        if (!isInPortfolio(currency)) {
+            addToPortfolio(currency);
+        }
+        else {
+            removeFromPortfolio(currency);
+        }
+        portfolio.setValue(portfolio.getValue());
+    }
+
     public boolean isInPortfolio(Currency currency) {
         return repository.isCurrencyInserted(currency);
     }
 
     public void addToPortfolio(Currency currency) {
         repository.insertCurrency(currency);
-        getPortfolio(); // FIXME: kinda ugly
+        currency.setInPortfolio(true);
         portfolio.getValue().add(currency);
     }
 
     public void removeFromPortfolio(Currency currency) {
         repository.deleteCurrency(currency);
-        getPortfolio(); // FIXME: kinda ugly
+        currency.setInPortfolio(false);
         portfolio.getValue().remove(currency);
     }
 
@@ -93,6 +103,7 @@ public class CurrencyViewModel extends ViewModel {
             @Override
             public void onResponse(Call<List<Currency>> call, Response<List<Currency>> response) {
                 market.setValue(response.body());
+                getPortfolio(); // FIXME: kinda ugly
             }
 
             @Override
@@ -111,6 +122,8 @@ public class CurrencyViewModel extends ViewModel {
                 .filter(c -> currenciesId.contains(c.getId()))
                 .collect(Collectors.toList());
 
+        currencies.forEach(c -> c.setInPortfolio(true));
+
         portfolio.setValue(currencies);
 
         currenciesId.removeIf(id -> currencies.stream().anyMatch(c -> c.getId().equals(id)));
@@ -120,7 +133,7 @@ public class CurrencyViewModel extends ViewModel {
                 .create(CryptoCompareService.class);
 
         CryptoCompareService priceService = CryptoCompareService.RetrofitClientInstance
-                .getRetrofitInstance(Double[].class, new PriceDeserializer())
+                .getRetrofitInstance(String[].class, new PriceDeserializer())
                 .create(CryptoCompareService.class);
 
         for (String id : currenciesId) {
@@ -146,20 +159,22 @@ public class CurrencyViewModel extends ViewModel {
     }
 
     protected void fetchPrice(Currency currency, CryptoCompareService service) {
-        Call<Double[]> getPrice = service.getCurrencyPrice(currency.getId());
+        Call<String[]> getPrice = service.getCurrencyPrice(currency.getId());
 
-        getPrice.enqueue(new Callback<Double[]>() {
+        getPrice.enqueue(new Callback<String[]>() {
             @Override
-            public void onResponse(Call<Double[]> call, Response<Double[]> response) {
-                Double[] data = response.body();
+            public void onResponse(Call<String[]> call, Response<String[]> response) {
+                String[] data = response.body();
                 currency.setPrice(data[0]);
-                currency.setPercentChange(data[1]);
+                currency.setMarketCap(data[1]);
+                currency.setPercentChange(data[2]);
+                currency.setInPortfolio(repository.isCurrencyInserted(currency));
                 portfolio.getValue().add(currency);
                 portfolio.setValue(portfolio.getValue());
             }
 
             @Override
-            public void onFailure(Call<Double[]> call, Throwable t) {
+            public void onFailure(Call<String[]> call, Throwable t) {
                 Log.e("getPrice", t.getMessage());
             }
         });

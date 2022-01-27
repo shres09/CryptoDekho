@@ -79,4 +79,9 @@ public class PortfolioFragment extends Fragment implements CurrencyClickListener
     public void onCurrencyClick(Currency currency) {
         viewModel.selectData(currency);
     }
+
+    @Override
+    public void onPortfolioClick(Currency currency) {
+        viewModel.handlePortfolioChange(currency);
+    }
 }

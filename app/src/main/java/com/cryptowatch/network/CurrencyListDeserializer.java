@@ -22,14 +22,16 @@ public class CurrencyListDeserializer implements JsonDeserializer<List<Currency>
         for (JsonElement el : currencyArray) {
             final JsonObject currency = el.getAsJsonObject();
             final JsonObject coinInfo = currency.getAsJsonObject("CoinInfo");
-            final JsonObject price = currency.getAsJsonObject("RAW").getAsJsonObject("EUR");
+            final JsonObject price = currency.getAsJsonObject("DISPLAY").getAsJsonObject("EUR");
 
             currencyList.add(new Currency(
                     coinInfo.get("Name").getAsString(),
                     coinInfo.get("FullName").getAsString(),
                     coinInfo.get("ImageUrl").getAsString(),
-                    price.get("PRICE").getAsDouble(),
-                    price.get("CHANGEPCT24HOUR").getAsDouble()
+                    price.get("PRICE").getAsString(),
+                    price.get("MKTCAP").getAsString(),
+                    price.get("CHANGEPCT24HOUR").getAsString(),
+                    false
             ));
         }
 

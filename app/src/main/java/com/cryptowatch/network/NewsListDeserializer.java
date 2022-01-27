@@ -25,10 +25,8 @@ public class NewsListDeserializer implements JsonDeserializer<List<NewsArticle>>
 
             articleList.add(new NewsArticle(
                     article.get("title").getAsString(),
-                    article.get("body").getAsString(),
                     article.get("imageurl").getAsString(),
                     source.get("name").getAsString(),
-                    article.get("published_on").getAsLong(),
                     article.get("url").getAsString()
             ));
         }

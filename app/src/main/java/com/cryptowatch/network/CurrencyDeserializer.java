@@ -26,8 +26,10 @@ public class CurrencyDeserializer implements JsonDeserializer<Currency> {
                 currency.get("Symbol").getAsString(),
                 currency.get("CoinName").getAsString(),
                 currency.get("ImageUrl").getAsString(),
-                0,
-                0
+                "0",
+                "0",
+                "0",
+                false
         );
     }
 }
