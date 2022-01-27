@@ -28,7 +28,8 @@ public class CurrencyListDeserializer implements JsonDeserializer<List<Currency>
                     coinInfo.get("Name").getAsString(),
                     coinInfo.get("FullName").getAsString(),
                     coinInfo.get("ImageUrl").getAsString(),
-                    price.get("PRICE").getAsDouble()
+                    price.get("PRICE").getAsDouble(),
+                    price.get("CHANGEPCT24HOUR").getAsDouble()
             ));
         }
 

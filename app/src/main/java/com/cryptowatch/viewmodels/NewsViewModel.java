@@ -14,7 +14,6 @@ import retrofit2.Call;
 
 import com.cryptowatch.network.CryptoCompareService;
 import com.cryptowatch.network.NewsListDeserializer;
-import com.cryptowatch.network.RetrofitClientInstance;
 import com.cryptowatch.models.NewsArticle;
 import com.google.gson.reflect.TypeToken;
 
@@ -31,7 +30,7 @@ public class NewsViewModel extends ViewModel {
 
     // TODO: Move to repository/service
     protected void fetchNews() {
-        CryptoCompareService service = RetrofitClientInstance
+        CryptoCompareService service = CryptoCompareService.RetrofitClientInstance
                 .getRetrofitInstance(new TypeToken<List<NewsArticle>>() {}.getType(), new NewsListDeserializer())
                 .create(CryptoCompareService.class);
 

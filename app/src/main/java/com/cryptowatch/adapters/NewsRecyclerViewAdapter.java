@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -14,6 +15,7 @@ import java.util.List;
 import com.cryptowatch.R;
 import com.cryptowatch.interfaces.NewsClickListener;
 import com.cryptowatch.models.NewsArticle;
+import com.squareup.picasso.Picasso;
 
 public class NewsRecyclerViewAdapter
         extends RecyclerView.Adapter<NewsRecyclerViewAdapter.NewsViewHolder> {
@@ -38,6 +40,7 @@ public class NewsRecyclerViewAdapter
     @Override
     public void onBindViewHolder(@NonNull NewsViewHolder holder, int position) {
         NewsArticle article = data.get(position);
+        Picasso.get().load(article.getImage()).into(holder.image);
         holder.title.setText(article.getTitle());
         holder.description.setText(article.getDescription());
     }
@@ -48,11 +51,13 @@ public class NewsRecyclerViewAdapter
     }
 
     protected class NewsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        private final ImageView image;
         private final TextView title;
         private final TextView description;
 
         public NewsViewHolder(View view) {
             super(view);
+            image = view.findViewById(R.id.imageArticle);
             title = view.findViewById(R.id.labelTitle);
             description = view.findViewById(R.id.labelDescription);
             view.setOnClickListener(this);

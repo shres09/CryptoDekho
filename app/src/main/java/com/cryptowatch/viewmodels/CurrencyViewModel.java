@@ -18,7 +18,6 @@ import com.cryptowatch.network.CryptoCompareService;
 import com.cryptowatch.network.CurrencyDeserializer;
 import com.cryptowatch.network.OhlcListDeserializer;
 import com.cryptowatch.network.PriceDeserializer;
-import com.cryptowatch.network.RetrofitClientInstance;
 import com.cryptowatch.network.CurrencyListDeserializer;
 import com.cryptowatch.models.Ohlc;
 import com.cryptowatch.models.Currency;
@@ -84,7 +83,7 @@ public class CurrencyViewModel extends ViewModel {
 
     // TODO: Move to service
     protected void fetchMarket() {
-        CryptoCompareService service = RetrofitClientInstance
+        CryptoCompareService service = CryptoCompareService.RetrofitClientInstance
                 .getRetrofitInstance(new TypeToken<List<Currency>>() {}.getType(), new CurrencyListDeserializer())
                 .create(CryptoCompareService.class);
 
@@ -116,12 +115,12 @@ public class CurrencyViewModel extends ViewModel {
 
         currenciesId.removeIf(id -> currencies.stream().anyMatch(c -> c.getId().equals(id)));
 
-        CryptoCompareService currencyService = RetrofitClientInstance
+        CryptoCompareService currencyService = CryptoCompareService.RetrofitClientInstance
                 .getRetrofitInstance(Currency.class, new CurrencyDeserializer())
                 .create(CryptoCompareService.class);
 
-        CryptoCompareService priceService = RetrofitClientInstance
-                .getRetrofitInstance(Double.class, new PriceDeserializer())
+        CryptoCompareService priceService = CryptoCompareService.RetrofitClientInstance
+                .getRetrofitInstance(Double[].class, new PriceDeserializer())
                 .create(CryptoCompareService.class);
 
         for (String id : currenciesId) {
@@ -147,18 +146,20 @@ public class CurrencyViewModel extends ViewModel {
     }
 
     protected void fetchPrice(Currency currency, CryptoCompareService service) {
-        Call<Double> getPrice = service.getCurrencyPrice(currency.getId());
+        Call<Double[]> getPrice = service.getCurrencyPrice(currency.getId());
 
-        getPrice.enqueue(new Callback<Double>() {
+        getPrice.enqueue(new Callback<Double[]>() {
             @Override
-            public void onResponse(Call<Double> call, Response<Double> response) {
-                currency.setPrice(response.body());
+            public void onResponse(Call<Double[]> call, Response<Double[]> response) {
+                Double[] data = response.body();
+                currency.setPrice(data[0]);
+                currency.setPercentChange(data[1]);
                 portfolio.getValue().add(currency);
                 portfolio.setValue(portfolio.getValue());
             }
 
             @Override
-            public void onFailure(Call<Double> call, Throwable t) {
+            public void onFailure(Call<Double[]> call, Throwable t) {
                 Log.e("getPrice", t.getMessage());
             }
         });
@@ -166,7 +167,7 @@ public class CurrencyViewModel extends ViewModel {
 
     // TODO: Move to service
     protected void fetchOhlc() {
-        CryptoCompareService service = RetrofitClientInstance
+        CryptoCompareService service = CryptoCompareService.RetrofitClientInstance
                 .getRetrofitInstance(new TypeToken<List<Ohlc>>() {}.getType(), new OhlcListDeserializer())
                 .create(CryptoCompareService.class);
 

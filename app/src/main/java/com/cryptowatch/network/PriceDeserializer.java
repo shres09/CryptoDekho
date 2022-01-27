@@ -9,9 +9,9 @@ import com.google.gson.JsonParseException;
 import java.lang.reflect.Type;
 import java.util.stream.Collectors;
 
-public class PriceDeserializer implements JsonDeserializer<Double> {
+public class PriceDeserializer implements JsonDeserializer<Double[]> {
     @Override
-    public Double deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+    public Double[] deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         JsonObject data = json.getAsJsonObject().getAsJsonObject("RAW");
 
         JsonObject priceInfo = data.entrySet()
@@ -22,6 +22,6 @@ public class PriceDeserializer implements JsonDeserializer<Double> {
                 .getAsJsonObject()
                 .getAsJsonObject("EUR"); // FIXME: currency shouldn't be hardcoded
 
-        return priceInfo.get("PRICE").getAsDouble();
+        return new Double[]{ priceInfo.get("PRICE").getAsDouble(), priceInfo.get("CHANGEPCT24HOUR").getAsDouble() };
     }
 }

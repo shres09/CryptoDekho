@@ -8,16 +8,18 @@ public class Currency {
     private String name;
     private String image;
     private double price;
+    private double percentChange;
 
     public Currency() {
 
     }
 
-    public Currency(String id, String name, String image, double price) {
+    public Currency(String id, String name, String image, double price, double percentChange) {
         this.id = id;
         this.name = name;
         this.image = image;
         this.price = price;
+        this.percentChange = percentChange;
     }
 
     public String getId() {
@@ -50,5 +52,13 @@ public class Currency {
 
     public void setPrice(double price) {
         this.price = price;
+    }
+
+    public double getPercentChange() {
+        return percentChange;
+    }
+
+    public void setPercentChange(double percentChange) {
+        this.percentChange = percentChange;
     }
 }

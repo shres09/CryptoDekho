@@ -8,8 +8,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.SearchView;
 
 import com.cryptowatch.R;
 import com.cryptowatch.adapters.CurrencyRecyclerViewAdapter;
@@ -19,6 +24,7 @@ import com.cryptowatch.viewmodels.CurrencyViewModel;
 
 public class MarketFragment extends Fragment implements CurrencyClickListener {
     private CurrencyViewModel viewModel;
+    private CurrencyRecyclerViewAdapter adapter;
 
     public MarketFragment() {
         // Required empty public constructor
@@ -31,6 +37,7 @@ public class MarketFragment extends Fragment implements CurrencyClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         viewModel = new ViewModelProvider(requireActivity()).get(CurrencyViewModel.class);
     }
 
@@ -41,9 +48,31 @@ public class MarketFragment extends Fragment implements CurrencyClickListener {
         RecyclerView recyclerView = view.findViewById(R.id.cryptocurrencyRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         viewModel.getMarket().observe(getViewLifecycleOwner(), data -> {
-            recyclerView.setAdapter(new CurrencyRecyclerViewAdapter(getContext(), data, this));
+            adapter = new CurrencyRecyclerViewAdapter(getContext(), data, this);
+            recyclerView.setAdapter(adapter);
         });
         return view;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.search_menu, menu);
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) searchItem.getActionView();
+        searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                adapter.getFilter().filter(newText);
+                return false;
+            }
+        });
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
