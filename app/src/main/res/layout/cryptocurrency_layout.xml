@@ -77,14 +77,13 @@
             app:layout_constraintEnd_toStartOf="@+id/btnPortfolio"
             app:layout_constraintTop_toBottomOf="@+id/labelPrice" />
 
-        <ToggleButton
+        <CheckBox
             android:id="@+id/btnPortfolio"
+            style="@android:style/Widget.Material.CompoundButton.CheckBox"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:background="@drawable/toggle_portfolio"
-            android:checked="false"
-            android:textOff=""
-            android:textOn=""
+            android:button="@drawable/toggle_portfolio"
+            android:buttonTint="@android:color/darker_gray"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

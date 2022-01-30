@@ -3,6 +3,7 @@ package com.cryptowatch.network;
 import com.cryptowatch.models.Ohlc;
 import com.cryptowatch.models.Currency;
 import com.cryptowatch.models.NewsArticle;
+import com.cryptowatch.models.Value;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -24,10 +25,16 @@ public interface CryptoCompareService {
     Call<Currency> getCurrency(@Query("fsym") String id);
 
     @GET("pricemultifull?tsyms=EUR")
-    Call<String[]> getCurrencyPrice(@Query("fsyms") String id);
+    Call<Value> getCurrencyValue(@Query("fsyms") String id);
 
-    @GET("v2/histoday?&tsym=EUR&limit=10")
-    Call<List<Ohlc>> getDailyOhlc(@Query("fsym") String id);
+    @GET("v2/histominute?tsym=EUR")
+    Call<List<Ohlc>> getOhlcMinute(@Query("fsym") String id, @Query("limit") int count);
+
+    @GET("v2/histohour?tsym=EUR")
+    Call<List<Ohlc>> getOhlcHourly(@Query("fsym") String id, @Query("limit") int count);
+
+    @GET("v2/histoday?tsym=EUR")
+    Call<List<Ohlc>> getOhlcDaily(@Query("fsym") String id, @Query("limit") int count);
 
     @GET("v2/news/?lang=EN")
     Call<List<NewsArticle>> getLatestNews();

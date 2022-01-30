@@ -13,7 +13,7 @@ import retrofit2.Response;
 import retrofit2.Call;
 
 import com.cryptowatch.network.CryptoCompareService;
-import com.cryptowatch.network.NewsListDeserializer;
+import com.cryptowatch.utils.NewsListDeserializer;
 import com.cryptowatch.models.NewsArticle;
 import com.google.gson.reflect.TypeToken;
 

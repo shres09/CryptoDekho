@@ -20,10 +20,10 @@ import com.cryptowatch.R;
 import com.cryptowatch.adapters.CurrencyRecyclerViewAdapter;
 import com.cryptowatch.interfaces.CurrencyClickListener;
 import com.cryptowatch.models.Currency;
-import com.cryptowatch.viewmodels.CurrencyViewModel;
+import com.cryptowatch.viewmodels.ListViewModel;
 
 public class PortfolioFragment extends Fragment implements CurrencyClickListener {
-    private CurrencyViewModel viewModel;
+    private ListViewModel viewModel;
     private CurrencyRecyclerViewAdapter adapter;
 
     public PortfolioFragment() {
@@ -38,7 +38,7 @@ public class PortfolioFragment extends Fragment implements CurrencyClickListener
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        viewModel = new ViewModelProvider(requireActivity()).get(CurrencyViewModel.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(ListViewModel.class);
     }
 
     @Override

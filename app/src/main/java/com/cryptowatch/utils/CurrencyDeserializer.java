@@ -1,6 +1,7 @@
-package com.cryptowatch.network;
+package com.cryptowatch.utils;
 
 import com.cryptowatch.models.Currency;
+import com.cryptowatch.models.Value;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -26,9 +27,8 @@ public class CurrencyDeserializer implements JsonDeserializer<Currency> {
                 currency.get("Symbol").getAsString(),
                 currency.get("CoinName").getAsString(),
                 currency.get("ImageUrl").getAsString(),
-                "0",
-                "0",
-                "0",
+                null,
+                new Value(),
                 false
         );
     }

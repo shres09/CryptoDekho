@@ -1,5 +1,7 @@
 package com.cryptowatch.activities;
 
+import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,11 +16,11 @@ import com.cryptowatch.data.Database;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import com.cryptowatch.R;
-import com.cryptowatch.viewmodels.CurrencyViewModel;
+import com.cryptowatch.viewmodels.ListViewModel;
 import com.cryptowatch.models.Currency;
 
 public class MainActivity extends AppCompatActivity {
-    private CurrencyViewModel viewModel;
+    private ListViewModel viewModel;
     private NavController nvc;
 
     @Override
@@ -29,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void initComponents() {
-        viewModel = new ViewModelProvider(this).get(CurrencyViewModel.class);
+        viewModel = new ViewModelProvider(this).get(ListViewModel.class);
         viewModel.setRepository(new CurrencyRepository(new Database(this)));
         viewModel.getSelected().observe(this, this::navigate);
 
@@ -42,7 +44,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void navigate(Currency currency) {
-        nvc.navigate(R.id.detail);
+        Intent intent = new Intent(this, CurrencyActivity.class);
+        intent.putExtra(CurrencyActivity.CURRENCY_INTENT_KEY, currency);
+        startActivity(intent);
     }
-
 }

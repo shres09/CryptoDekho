@@ -1,30 +1,54 @@
 package com.cryptowatch.models;
 
-public class Currency {
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Currency implements Parcelable {
     public static final String TABLE_NAME = "currency";
     public static final String FIELD_ID = "id";
 
     private String id;
     private String name;
-    private String image;
-    private String price;
-    private String marketCap;
-    private String percentChange;
+    private String imageUrl;
+    private Bitmap image;
+    private Value value;
     private boolean isInPortfolio;
 
     public Currency() {
 
     }
 
-    public Currency(String id, String name, String image, String price, String marketCap, String percentChange, boolean isInPortfolio) {
+    public Currency(String id, String name, String imageUrl, Bitmap image, Value value, boolean isInPortfolio) {
         this.id = id;
         this.name = name;
+        this.imageUrl = imageUrl;
         this.image = image;
-        this.price = price;
-        this.marketCap = marketCap;
-        this.percentChange = percentChange;
+        this.value = value;
         this.isInPortfolio = isInPortfolio;
     }
+
+    protected Currency(Parcel in) {
+        id = in.readString();
+        name = in.readString();
+        imageUrl = in.readString();
+        image = in.readParcelable(Bitmap.class.getClassLoader());
+        value = in.readParcelable(Value.class.getClassLoader());
+        isInPortfolio = in.readByte() != 0;
+    }
+
+    public static final Creator<Currency> CREATOR = new Creator<Currency>() {
+        @Override
+        public Currency createFromParcel(Parcel in) {
+            return new Currency(in);
+        }
+
+        @Override
+        public Currency[] newArray(int size) {
+            return new Currency[size];
+        }
+    };
 
     public String getId() {
         return id;
@@ -42,36 +66,28 @@ public class Currency {
         this.name = name;
     }
 
-    public String getImage() {
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public Bitmap getImage() {
         return image;
     }
 
-    public void setImage(String image) {
+    public void setImage(Bitmap image) {
         this.image = image;
     }
 
-    public String getPrice() {
-        return price;
+    public Value getValue() {
+        return value;
     }
 
-    public void setPrice(String price) {
-        this.price = price;
-    }
-
-    public String getMarketCap() {
-        return marketCap;
-    }
-
-    public void setMarketCap(String marketCap) {
-        this.marketCap = marketCap;
-    }
-
-    public String getPercentChange() {
-        return percentChange;
-    }
-
-    public void setPercentChange(String percentChange) {
-        this.percentChange = percentChange;
+    public void setValue(Value value) {
+        this.value = value;
     }
 
     public boolean isInPortfolio() {
@@ -80,5 +96,20 @@ public class Currency {
 
     public void setInPortfolio(boolean inPortfolio) {
         isInPortfolio = inPortfolio;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(name);
+        dest.writeString(imageUrl);
+        dest.writeParcelable(image, flags);
+        dest.writeParcelable(value, flags);
+        dest.writeByte((byte) (isInPortfolio ? 1 : 0));
     }
 }

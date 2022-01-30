@@ -1,15 +1,17 @@
 package com.cryptowatch.adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,6 +23,7 @@ import com.cryptowatch.R;
 import com.cryptowatch.interfaces.CurrencyClickListener;
 import com.cryptowatch.models.Currency;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 public class CurrencyRecyclerViewAdapter
         extends RecyclerView.Adapter<CurrencyRecyclerViewAdapter.CurrencyViewHolder> implements Filterable {
@@ -76,13 +79,30 @@ public class CurrencyRecyclerViewAdapter
     public void onBindViewHolder(@NonNull CurrencyViewHolder holder, int position) {
         Currency currency = filteredList.get(position);
         // FIXME: move to static string
-        Picasso.get().load("https://www.cryptocompare.com/" + currency.getImage()).into(holder.logo);
+
+        Target target = new Target() {
+            @Override
+            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                holder.logo.setImageBitmap(bitmap);
+                currency.setImage(bitmap);
+            }
+
+            @Override
+            public void onBitmapFailed(Exception e, Drawable errorDrawable) { }
+
+            @Override
+            public void onPrepareLoad(Drawable placeHolderDrawable) {}
+        };
+
+        Picasso.get().load("https://www.cryptocompare.com/" + currency.getImageUrl()).into(target);
+
+
         holder.id.setText(currency.getId());
         holder.name.setText(currency.getName());
-        holder.price.setText(currency.getPrice());
-        holder.marketCap.setText("MCap " + currency.getMarketCap());
-        holder.percentChange.setText(currency.getPercentChange() + "%");
-        holder.percentChange.setTextColor((currency.getPercentChange().contains("-")) ? Color.RED : Color.GREEN);
+        holder.price.setText(currency.getValue().getPrice());
+        holder.marketCap.setText("MCap " + currency.getValue().getMarketCap());
+        holder.percentChange.setText(currency.getValue().getChange24H());
+        holder.percentChange.setTextColor((currency.getValue().getChange24H().contains("-")) ? Color.RED : Color.GREEN);
         holder.portfolio.setChecked(currency.isInPortfolio());
     }
 
@@ -103,7 +123,7 @@ public class CurrencyRecyclerViewAdapter
         private final TextView price;
         private final TextView marketCap;
         private final TextView percentChange;
-        private final ToggleButton portfolio;
+        private final CheckBox portfolio;
 
         public CurrencyViewHolder(View view) {
             super(view);
@@ -127,7 +147,7 @@ public class CurrencyRecyclerViewAdapter
             });
         }
 
-        public void setupPortfolioClick(ToggleButton portfolio) {
+        public void setupPortfolioClick(CheckBox portfolio) {
             portfolio.setOnClickListener(v -> {
                 Currency currency = filteredList.get(getAdapterPosition());
                 clickListener.onPortfolioClick(currency);

@@ -1,6 +1,7 @@
-package com.cryptowatch.network;
+package com.cryptowatch.utils;
 
 import com.cryptowatch.models.Currency;
+import com.cryptowatch.models.Value;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -22,15 +23,25 @@ public class CurrencyListDeserializer implements JsonDeserializer<List<Currency>
         for (JsonElement el : currencyArray) {
             final JsonObject currency = el.getAsJsonObject();
             final JsonObject coinInfo = currency.getAsJsonObject("CoinInfo");
-            final JsonObject price = currency.getAsJsonObject("DISPLAY").getAsJsonObject("EUR");
+            final JsonObject rawValue = currency.getAsJsonObject("RAW").getAsJsonObject("EUR");
+            final JsonObject value = currency.getAsJsonObject("DISPLAY").getAsJsonObject("EUR");
 
             currencyList.add(new Currency(
                     coinInfo.get("Name").getAsString(),
                     coinInfo.get("FullName").getAsString(),
                     coinInfo.get("ImageUrl").getAsString(),
-                    price.get("PRICE").getAsString(),
-                    price.get("MKTCAP").getAsString(),
-                    price.get("CHANGEPCT24HOUR").getAsString(),
+                    null,
+                    new Value(
+                            rawValue.get("PRICE").getAsDouble(),
+                            value.get("PRICE").getAsString(),
+                            value.get("MKTCAP").getAsString(),
+                            value.get("SUPPLY").getAsString(),
+                            value.get("CHANGEPCTHOUR").getAsString() + "%",
+                            value.get("CHANGEPCT24HOUR").getAsString() + "%",
+                            value.get("VOLUME24HOUR").getAsString(),
+                            value.get("HIGH24HOUR").getAsString(),
+                            value.get("LOW24HOUR").getAsString()
+                    ),
                     false
             ));
         }
