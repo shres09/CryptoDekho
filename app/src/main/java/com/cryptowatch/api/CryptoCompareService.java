@@ -1,8 +1,8 @@
-package com.cryptowatch.network;
+package com.cryptowatch.api;
 
-import com.cryptowatch.models.Ohlc;
 import com.cryptowatch.models.Currency;
 import com.cryptowatch.models.NewsArticle;
+import com.cryptowatch.models.Ohlc;
 import com.cryptowatch.models.Value;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -18,26 +18,30 @@ import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 public interface CryptoCompareService {
-    @GET("top/mktcapfull?tsym=EUR&limit=13") // FIXME: works with 13, doesnt work with 14
-    Call<List<Currency>> getToplistByMarketCap();
+    // FIXME: maybe first and third method can be merged
+    @GET("all/coinlist?summary=true")
+    Call<List<Currency>> getCurrencySummary(@Query("fsym") String id);
 
-    @GET("all/coinlist")
-    Call<Currency> getCurrency(@Query("fsym") String id);
+    @GET("pricemultifull")
+    Call<Value> getCurrencyValue(@Query("fsyms") String id, @Query("tsyms") String conversionCurrency);
 
-    @GET("pricemultifull?tsyms=EUR")
-    Call<Value> getCurrencyValue(@Query("fsyms") String id);
+    @GET("all/coinlist?summary=true")
+    Call<List<Currency>> getAllCurrencySummary();
 
-    @GET("v2/histominute?tsym=EUR")
-    Call<List<Ohlc>> getOhlcMinute(@Query("fsym") String id, @Query("limit") int count);
+    @GET("top/mktcapfull")
+    Call<List<Currency>> getToplistByMarketCap(@Query("tsym") String conversionCurrency, @Query("limit") int count);
 
-    @GET("v2/histohour?tsym=EUR")
-    Call<List<Ohlc>> getOhlcHourly(@Query("fsym") String id, @Query("limit") int count);
+    @GET("v2/histominute")
+    Call<List<Ohlc>> getOhlcMinute(@Query("fsym") String id, @Query("tsym") String conversionCurrency, @Query("limit") int count);
 
-    @GET("v2/histoday?tsym=EUR")
-    Call<List<Ohlc>> getOhlcDaily(@Query("fsym") String id, @Query("limit") int count);
+    @GET("v2/histohour")
+    Call<List<Ohlc>> getOhlcHourly(@Query("fsym") String id, @Query("tsym") String conversionCurrency, @Query("limit") int count);
 
-    @GET("v2/news/?lang=EN")
-    Call<List<NewsArticle>> getLatestNews();
+    @GET("v2/histoday")
+    Call<List<Ohlc>> getOhlcDaily(@Query("fsym") String id, @Query("tsym") String conversionCurrency, @Query("limit") int count);
+
+    @GET("v2/news/")
+    Call<List<NewsArticle>> getLatestNews(@Query("lang") String language);
 
     class RetrofitClientInstance {
         private static final String BASE_URL = "https://min-api.cryptocompare.com/data/";

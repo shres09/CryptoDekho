@@ -1,4 +1,4 @@
-package com.cryptowatch.utils;
+package com.cryptowatch.utilities;
 
 import com.cryptowatch.models.NewsArticle;
 import com.google.gson.JsonArray;

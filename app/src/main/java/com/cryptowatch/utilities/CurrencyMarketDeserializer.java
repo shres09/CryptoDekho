@@ -1,4 +1,4 @@
-package com.cryptowatch.utils;
+package com.cryptowatch.utilities;
 
 import com.cryptowatch.models.Currency;
 import com.cryptowatch.models.Value;
@@ -13,7 +13,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CurrencyListDeserializer implements JsonDeserializer<List<Currency>> {
+public class CurrencyMarketDeserializer implements JsonDeserializer<List<Currency>> {
     @Override
     public List<Currency> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         List<Currency> currencyList = new ArrayList<>();
@@ -22,14 +22,20 @@ public class CurrencyListDeserializer implements JsonDeserializer<List<Currency>
 
         for (JsonElement el : currencyArray) {
             final JsonObject currency = el.getAsJsonObject();
+            if (currency.getAsJsonObject("RAW") == null || currency.getAsJsonObject("DISPLAY") == null) {
+                continue;
+            }
+
             final JsonObject coinInfo = currency.getAsJsonObject("CoinInfo");
-            final JsonObject rawValue = currency.getAsJsonObject("RAW").getAsJsonObject("EUR");
-            final JsonObject value = currency.getAsJsonObject("DISPLAY").getAsJsonObject("EUR");
+            final JsonObject rawValue = currency.getAsJsonObject("RAW").getAsJsonObject(Constants.CONVERSION_CURRENCY);
+            final JsonObject value = currency.getAsJsonObject("DISPLAY").getAsJsonObject(Constants.CONVERSION_CURRENCY);
 
             currencyList.add(new Currency(
                     coinInfo.get("Name").getAsString(),
                     coinInfo.get("FullName").getAsString(),
-                    coinInfo.get("ImageUrl").getAsString(),
+                    (coinInfo.get("ImageUrl") != null
+                            ? coinInfo.get("ImageUrl").getAsString()
+                            : null),
                     null,
                     new Value(
                             rawValue.get("PRICE").getAsDouble(),

@@ -1,8 +1,5 @@
 package com.cryptowatch.activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
@@ -13,18 +10,21 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.lifecycle.ViewModelProvider;
+
 import com.cryptowatch.R;
-import com.cryptowatch.data.CurrencyRepository;
 import com.cryptowatch.data.Database;
 import com.cryptowatch.models.Currency;
 import com.cryptowatch.models.Ohlc;
+import com.cryptowatch.utilities.Constants;
 import com.cryptowatch.viewmodels.CurrencyViewModel;
-
+import com.cryptowatch.viewmodels.CurrencyViewModelFactory;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
@@ -38,6 +38,7 @@ import com.google.android.material.chip.ChipGroup;
 import java.util.ArrayList;
 import java.util.List;
 
+// FIXME: refactor whole class
 public class CurrencyActivity extends AppCompatActivity {
     public static String CURRENCY_INTENT_KEY = "currency";
 
@@ -49,13 +50,16 @@ public class CurrencyActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_currency);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-//        setHasOptionsMenu(true);
-        viewModel = new CurrencyViewModel(getIntent().getParcelableExtra(CURRENCY_INTENT_KEY), new CurrencyRepository(new Database(this)));
-        renderInfo(viewModel.getCurrency().getValue()); // FIXME: ugly?
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true); // FIXME: returns on wrong fragment
+
+        Currency c = getIntent().getParcelableExtra(CURRENCY_INTENT_KEY);
+        viewModel = new ViewModelProvider(this, new CurrencyViewModelFactory(c, new Database(this)))
+                .get(CurrencyViewModel.class);
+        viewModel.getCurrency().observe(this, currency -> {
+            renderInfo(currency);
+            initConversion(currency);
+        });
         viewModel.getOhlc().observe(this, ohlc -> renderChart(ohlc));
-        initConversion(viewModel.getCurrency().getValue());
-        // viewModel.fetchOhlc("hourly", 24);  // FIXME: ugly?
         renderChipGroup();
     }
 
@@ -66,13 +70,8 @@ public class CurrencyActivity extends AppCompatActivity {
         CheckBox btnPortfolio = portfolioItem.getActionView().findViewById(R.id.checkBox);
         Currency currency = viewModel.getCurrency().getValue();
         btnPortfolio.setChecked(viewModel.isInPortfolio(currency));
-        // FIXME: Refactor this and other checkbox
-        btnPortfolio.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                viewModel.handlePortfolioChange(currency);
-            }
-        });
+        // FIXME: Use isChecked variable
+        btnPortfolio.setOnCheckedChangeListener((v, isChecked) -> viewModel.handlePortfolioChange(currency));
         return true;
     }
 
@@ -88,6 +87,8 @@ public class CurrencyActivity extends AppCompatActivity {
         }
 
         TextView labelName = findViewById(R.id.labelDetailName);
+        TextView labelConversionCurrency = findViewById(R.id.labelConversionCurrency);
+
         TextView labelPrice = findViewById(R.id.labelDetailPrice);
         TextView labelMarketCap = findViewById(R.id.labelDetailMarketCap);
         TextView labelSupply = findViewById(R.id.labelSupply);
@@ -98,6 +99,13 @@ public class CurrencyActivity extends AppCompatActivity {
         TextView label24hLow = findViewById(R.id.label24hLow);
 
         labelName.setText(currency.getName());
+        labelConversionCurrency.setText(Constants.CONVERSION_CURRENCY);
+
+        // FIXME: XD
+        if (currency.getValue() == null) {
+            return;
+        }
+
         labelPrice.setText(currency.getValue().getPrice());
         labelMarketCap.setText(currency.getValue().getMarketCap());
         labelSupply.setText(currency.getValue().getSupply());
@@ -222,36 +230,33 @@ public class CurrencyActivity extends AppCompatActivity {
 
     private void renderChipGroup() {
         ChipGroup chipGroup = findViewById(R.id.chipGroup);
-        chipGroup.setOnCheckedChangeListener(new ChipGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(ChipGroup group, int checkedId) {
-                Chip chip = chipGroup.findViewById(checkedId);
-                String text = chip.getText().toString();
-
-                switch (text) {
-                    // FIXME: static string
-                    case "1H":
-                        viewModel.fetchOhlc("minute", 60);
-                        break;
-                    case "24H":
-                        viewModel.fetchOhlc("hourly", 24);
-                        break;
-                    case "7D":
-                        viewModel.fetchOhlc("hourly", 168);
-                        break;
-                    case "1M":
-                        viewModel.fetchOhlc("daily", 30);
-                        break;
-                    case "3M":
-                        viewModel.fetchOhlc("daily", 90);
-                        break;
-                    case "1Y":
-                        viewModel.fetchOhlc("daily", 365);
-                        break;
-                    case "MAX":
-                        viewModel.fetchOhlc("daily", 2000);
-                        break;
-                }
+        chipGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            Chip chip = chipGroup.findViewById(checkedId);
+            String text = chip.getText().toString();
+            // FIXME: use id instead of text
+            switch (text) {
+                // FIXME: static string
+                case "1H":
+                    viewModel.fetchOhlc("minute", 60);
+                    break;
+                case "24H":
+                    viewModel.fetchOhlc("hourly", 24);
+                    break;
+                case "7D":
+                    viewModel.fetchOhlc("hourly", 168);
+                    break;
+                case "1M":
+                    viewModel.fetchOhlc("daily", 30);
+                    break;
+                case "3M":
+                    viewModel.fetchOhlc("daily", 90);
+                    break;
+                case "1Y":
+                    viewModel.fetchOhlc("daily", 365);
+                    break;
+                case "MAX":
+                    viewModel.fetchOhlc("daily", 2000);
+                    break;
             }
         });
     }

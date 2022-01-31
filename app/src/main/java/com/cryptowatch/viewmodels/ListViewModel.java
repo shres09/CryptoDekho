@@ -1,64 +1,78 @@
 package com.cryptowatch.viewmodels;
 
-import android.util.Log;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.cryptowatch.data.Database;
+import com.cryptowatch.data.ListRepository;
+import com.cryptowatch.data.PortfolioRepository;
+import com.cryptowatch.models.Currency;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Call;
-
-import com.cryptowatch.data.CurrencyRepository;
-import com.cryptowatch.models.Value;
-import com.cryptowatch.network.CryptoCompareService;
-import com.cryptowatch.utils.CurrencyDeserializer;
-import com.cryptowatch.utils.ValueDeserializer;
-import com.cryptowatch.utils.CurrencyListDeserializer;
-import com.cryptowatch.models.Ohlc;
-import com.cryptowatch.models.Currency;
-import com.google.gson.reflect.TypeToken;
-
 public class ListViewModel extends ViewModel {
-    private CurrencyRepository repository;
+    private ListRepository listRepository;
+    private PortfolioRepository portfolioRepository;
 
+    private MutableLiveData<List<Currency>> currencies;
     private MutableLiveData<List<Currency>> market;
     private MutableLiveData<List<Currency>> portfolio;
-    private MutableLiveData<Currency> selected = new MutableLiveData<>();
-    private MutableLiveData<List<Ohlc>> ohlc = new MutableLiveData<>();
+    private MutableLiveData<List<Currency>> search;
 
-    public void setRepository(CurrencyRepository repository) {
-        this.repository = repository;
+    public ListViewModel(Database database) {
+        this.listRepository = new ListRepository();
+        this.portfolioRepository = new PortfolioRepository(database);
+
+        this.currencies = listRepository.getAllCurrencies();
+        this.market = listRepository.getCurrenciesByTopList();
+        this.portfolio = portfolioRepository.getCurrenciesFromPortfolio();
+        this.search = new MutableLiveData<>(new ArrayList<>());
     }
 
-    // FIXME: da li ove dve metode moraju ovako
-    public LiveData<List<Currency>> getMarket() {
-        if (market == null) {
-            market = new MutableLiveData<>();
-            fetchMarket();
-        }
+    public LiveData<List<Currency>> getCurrencies() {
+        return currencies;
+    }
 
+    public LiveData<List<Currency>> getMarket() {
         return market;
     }
 
     public LiveData<List<Currency>> getPortfolio() {
-        if (portfolio == null) {
-            portfolio = new MutableLiveData<>();
-            fetchPortfolio();
-        }
-
         return portfolio;
     }
 
-    public LiveData<Currency> getSelected() {
-        return this.selected;
+    public LiveData<List<Currency>> getSearch() {
+        return search;
     }
 
-    public LiveData<List<Ohlc>> getOhlc() { return this.ohlc; }
+    public void setSearch(String query) {
+        if (currencies.getValue() == null) {
+            return;
+        }
+
+        String q = query.trim().toLowerCase();
+        List<Currency> list = currencies.getValue()
+                .stream()
+                .filter(c -> c.getId().toLowerCase().contains(q) || c.getName().toLowerCase().contains(q))
+                .collect(Collectors.toList());
+
+        search.setValue(list);
+    }
+
+//    public void validateMarketDataInPortfolio() {
+//        List<String> currenciesId = portfolioRepository.getAllCurrencyId();
+//        market.getValue().stream().forEach(
+//                currency -> {
+//                    if (currenciesId.contains(currency.getId())) {
+//                        currency.setInPortfolio(true);
+//                    }
+//                }
+//        );
+//        market.setValue(market.getValue());
+//    }
 
     public void handlePortfolioChange(Currency currency) {
         if (!isInPortfolio(currency)) {
@@ -67,112 +81,24 @@ public class ListViewModel extends ViewModel {
         else {
             removeFromPortfolio(currency);
         }
-        portfolio.setValue(portfolio.getValue());
+
+        // market.setValue(portfolio.getValue());
+        // portfolio.setValue(portfolio.getValue());
     }
 
     public boolean isInPortfolio(Currency currency) {
-        return repository.isCurrencyInserted(currency);
+        return portfolioRepository.isCurrencyInserted(currency);
     }
 
     public void addToPortfolio(Currency currency) {
-        repository.insertCurrency(currency);
+        portfolioRepository.insertCurrency(currency);
         currency.setInPortfolio(true);
-        portfolio.getValue().add(currency);
+        // portfolio.getValue().add(currency);
     }
 
     public void removeFromPortfolio(Currency currency) {
-        repository.deleteCurrency(currency);
+        portfolioRepository.deleteCurrency(currency);
         currency.setInPortfolio(false);
-        portfolio.getValue().remove(currency);
-    }
-
-    public void selectData(Currency currency) {
-        this.selected.setValue(currency);
-    }
-
-    // TODO: Move to service
-    protected void fetchMarket() {
-        CryptoCompareService service = CryptoCompareService.RetrofitClientInstance
-                .getRetrofitInstance(new TypeToken<List<Currency>>() {}.getType(), new CurrencyListDeserializer())
-                .create(CryptoCompareService.class);
-
-        Call<List<Currency>> getMarket = service.getToplistByMarketCap();
-
-        getMarket.enqueue(new Callback<List<Currency>>() {
-            @Override
-            public void onResponse(Call<List<Currency>> call, Response<List<Currency>> response) {
-                market.setValue(response.body());
-                getPortfolio(); // FIXME: kinda ugly
-            }
-
-            @Override
-            public void onFailure(Call<List<Currency>> call, Throwable t) {
-                Log.e("getToplistByMarketCap", t.getMessage());
-            }
-        });
-    }
-
-    // TODO: Move to service
-    protected void fetchPortfolio() {
-        List<String> currenciesId = repository.getAllCurrencyId();
-        List<Currency> currencies = market
-                .getValue()
-                .stream()
-                .filter(c -> currenciesId.contains(c.getId()))
-                .collect(Collectors.toList());
-
-        currencies.forEach(c -> c.setInPortfolio(true));
-
-        portfolio.setValue(currencies);
-
-        currenciesId.removeIf(id -> currencies.stream().anyMatch(c -> c.getId().equals(id)));
-
-        CryptoCompareService currencyService = CryptoCompareService.RetrofitClientInstance
-                .getRetrofitInstance(Currency.class, new CurrencyDeserializer())
-                .create(CryptoCompareService.class);
-
-        CryptoCompareService priceService = CryptoCompareService.RetrofitClientInstance
-                .getRetrofitInstance(String[].class, new ValueDeserializer())
-                .create(CryptoCompareService.class);
-
-        for (String id : currenciesId) {
-            fetchCurrency(id, currencyService, priceService);
-        }
-    }
-
-    // FIXME: ugly
-    protected void fetchCurrency(String id, CryptoCompareService currencyService, CryptoCompareService priceService) {
-        Call<Currency> getCurrency = currencyService.getCurrency(id);
-
-        getCurrency.enqueue(new Callback<Currency>() {
-            @Override
-            public void onResponse(Call<Currency> call, Response<Currency> response) {
-                fetchValue(response.body(), priceService);
-            }
-
-            @Override
-            public void onFailure(Call<Currency> call, Throwable t) {
-                Log.e("getCurrency", t.getMessage());
-            }
-        });
-    }
-
-    protected void fetchValue(Currency currency, CryptoCompareService service) {
-        Call<Value> getValue = service.getCurrencyValue(currency.getId());
-
-        getValue.enqueue(new Callback<Value>() {
-            @Override
-            public void onResponse(Call<Value> call, Response<Value> response) {
-                currency.setValue(response.body());
-                currency.setInPortfolio(repository.isCurrencyInserted(currency));
-                portfolio.getValue().add(currency);
-                portfolio.setValue(portfolio.getValue());
-            }
-
-            @Override
-            public void onFailure(Call<Value> call, Throwable t) {
-                Log.e("getCurrencyValue", t.getMessage());
-            }
-        });
+        // portfolio.getValue().remove(currency);
     }
 }

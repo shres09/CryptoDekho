@@ -12,6 +12,10 @@
         android:name="com.cryptowatch.fragments.PortfolioFragment"
         android:label="@string/app_name" />
     <fragment
+        android:id="@+id/search"
+        android:name="com.cryptowatch.fragments.SearchFragment"
+        android:label="@string/app_name" />
+    <fragment
         android:id="@+id/news"
         android:name="com.cryptowatch.fragments.NewsFragment"
         android:label="@string/app_name" />

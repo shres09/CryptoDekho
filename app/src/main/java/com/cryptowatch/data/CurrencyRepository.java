@@ -1,54 +1,94 @@
 package com.cryptowatch.data;
 
-import android.annotation.SuppressLint;
-import android.content.ContentValues;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
+import androidx.lifecycle.MutableLiveData;
+
+import com.cryptowatch.api.CryptoCompareService;
 import com.cryptowatch.models.Currency;
+import com.cryptowatch.models.Ohlc;
+import com.cryptowatch.models.Value;
+import com.cryptowatch.utilities.Constants;
+import com.cryptowatch.utilities.OhlcListDeserializer;
+import com.cryptowatch.utilities.ValueDeserializer;
+import com.google.gson.reflect.TypeToken;
 
-import java.util.ArrayList;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class CurrencyRepository {
-    private final Database database;
+    private MutableLiveData<Currency> currency;
+    private MutableLiveData<List<Ohlc>> ohlc;
 
-    public CurrencyRepository(Database database) {
-        this.database = database;
+    public CurrencyRepository(Currency curr) {
+        currency = new MutableLiveData<>(curr);
+        ohlc = new MutableLiveData<>();
     }
 
-    public void insertCurrency(Currency currency) {
-        SQLiteDatabase db = database.getWritableDatabase();
+    public MutableLiveData<Currency> getCurrencyValue() {
+        CryptoCompareService valueService = CryptoCompareService.RetrofitClientInstance
+                .getRetrofitInstance(Value.class, new ValueDeserializer())
+                .create(CryptoCompareService.class);
 
-        ContentValues cv = new ContentValues();
-        cv.put(Currency.FIELD_ID, currency.getId());
-        db.insert(Currency.TABLE_NAME, null, cv);
-    }
-
-    public int deleteCurrency(Currency currency) {
-        SQLiteDatabase db = database.getReadableDatabase();
-        return db.delete(Currency.TABLE_NAME, Currency.FIELD_ID + "=?", new String[] {currency.getId()});
-    }
-
-    @SuppressLint("Range")
-    public boolean isCurrencyInserted(Currency currency) {
-        SQLiteDatabase db = database.getReadableDatabase();
-        String query = String.format("SELECT * FROM %s WHERE %s = ?", Currency.TABLE_NAME, Currency.FIELD_ID);
-        Cursor cursor = db.rawQuery(query, new String[]{ String.valueOf(currency.getId())});
-        return cursor.moveToFirst();
-    }
-
-    @SuppressLint("Range")
-    public ArrayList<String> getAllCurrencyId() {
-        SQLiteDatabase db = database.getReadableDatabase();
-        String query = String.format("SELECT * FROM %s", Currency.TABLE_NAME);
-        Cursor cursor = db.rawQuery(query, null);
-        ArrayList<String> list = new ArrayList<>(cursor.getCount());
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            list.add(cursor.getString(cursor.getColumnIndex(Currency.FIELD_ID)));
-            cursor.moveToNext();
+        Currency curr = currency.getValue();
+        if (curr.getValue() != null) {
+            return currency;
         }
-        cursor.close();
-        return list;
+
+        Call<Value> call = valueService.getCurrencyValue(curr.getId(), Constants.CONVERSION_CURRENCY);
+
+        call.enqueue(new Callback<Value>() {
+            @Override
+            public void onResponse(Call<Value> call, Response<Value> response) {
+                curr.setValue(response.body());
+                currency.setValue(curr);
+            }
+
+            @Override
+            public void onFailure(Call<Value> call, Throwable t) {
+                Log.d("getCurrencyValue", t.getMessage());
+            }
+        });
+
+        return currency;
+    }
+
+    public MutableLiveData<List<Ohlc>> getOhlc(String currencyId, String type, int count) {
+        CryptoCompareService service = CryptoCompareService.RetrofitClientInstance
+                .getRetrofitInstance(new TypeToken<List<Ohlc>>() {}.getType(), new OhlcListDeserializer())
+                .create(CryptoCompareService.class);
+
+        Call<List<Ohlc>> call;
+
+        switch (type) {
+            case "minute":
+                call = service.getOhlcMinute(currencyId, Constants.CONVERSION_CURRENCY, count);
+                break;
+            case "hourly":
+                call = service.getOhlcHourly(currencyId, Constants.CONVERSION_CURRENCY, count);
+                break;
+            case "daily":
+                call = service.getOhlcDaily(currencyId, Constants.CONVERSION_CURRENCY, count);
+                break;
+            default:
+                return ohlc;
+        }
+
+        call.enqueue(new Callback<List<Ohlc>>() {
+            @Override
+            public void onResponse(Call<List<Ohlc>> call, Response<List<Ohlc>> response) {
+                ohlc.setValue(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<List<Ohlc>> call, Throwable t) {
+                Log.d("getOhlc", t.getMessage());
+            }
+        });
+
+        return ohlc;
     }
 }

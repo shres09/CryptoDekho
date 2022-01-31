@@ -14,9 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.cryptowatch.R;
 import com.cryptowatch.adapters.NewsRecyclerViewAdapter;
-import com.cryptowatch.interfaces.CurrencyClickListener;
 import com.cryptowatch.interfaces.NewsClickListener;
-import com.cryptowatch.models.Currency;
 import com.cryptowatch.models.NewsArticle;
 import com.cryptowatch.viewmodels.NewsViewModel;
 

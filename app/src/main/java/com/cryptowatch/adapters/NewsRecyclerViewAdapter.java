@@ -10,12 +10,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.List;
-
 import com.cryptowatch.R;
 import com.cryptowatch.interfaces.NewsClickListener;
 import com.cryptowatch.models.NewsArticle;
 import com.squareup.picasso.Picasso;
+
+import java.util.List;
 
 public class NewsRecyclerViewAdapter
         extends RecyclerView.Adapter<NewsRecyclerViewAdapter.NewsViewHolder> {
