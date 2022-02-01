@@ -43,7 +43,7 @@ public interface CryptoCompareService {
     @GET("v2/news/")
     Call<List<NewsArticle>> getLatestNews(@Query("lang") String language);
 
-    class RetrofitClientInstance {
+    class Client {
         private static final String BASE_URL = "https://min-api.cryptocompare.com/data/";
 
         private static Converter.Factory createGsonConverter(Type type, Object typeAdapter) {
@@ -54,11 +54,12 @@ public interface CryptoCompareService {
             return GsonConverterFactory.create(gson);
         }
 
-        public static Retrofit getRetrofitInstance(Type type, Object typeAdapter) {
+        public static CryptoCompareService getService(Type type, Object typeAdapter) {
             return new Retrofit.Builder()
                     .baseUrl(BASE_URL)
                     .addConverterFactory(createGsonConverter(type, typeAdapter))
-                    .build();
+                    .build()
+                    .create(CryptoCompareService.class);
         }
     }
 }

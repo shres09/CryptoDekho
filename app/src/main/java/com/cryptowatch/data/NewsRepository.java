@@ -20,9 +20,8 @@ public class NewsRepository {
     public MutableLiveData<List<NewsArticle>> getNews() {
         MutableLiveData<List<NewsArticle>> data = new MutableLiveData<>();
 
-        CryptoCompareService service = CryptoCompareService.RetrofitClientInstance
-                .getRetrofitInstance(new TypeToken<List<NewsArticle>>() {}.getType(), new NewsListDeserializer())
-                .create(CryptoCompareService.class);
+        CryptoCompareService service = CryptoCompareService.Client.getService(
+                new TypeToken<List<NewsArticle>>() {}.getType(), new NewsListDeserializer());
 
         Call<List<NewsArticle>> call = service.getLatestNews(Constants.LANGUAGE);
 

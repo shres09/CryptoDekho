@@ -23,27 +23,35 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+// TODO: do I need thread safe Singleton?
 public class PortfolioRepository {
+    private static PortfolioRepository instance;
+
     private final Database database;
+    private final MutableLiveData<List<Currency>> portfolio;
 
-    private MutableLiveData<List<Currency>> portfolio;
-
-    public PortfolioRepository(Database database) {
+    private PortfolioRepository(Database database) {
         this.database = database;
         this.portfolio = new MutableLiveData<>(new ArrayList<>());
     }
 
+    public static PortfolioRepository getInstance(Database database) {
+        if (instance == null) {
+            instance = new PortfolioRepository(database);
+        }
+        return instance;
+    }
+
     public MutableLiveData<List<Currency>> getCurrenciesFromPortfolio() {
-        CryptoCompareService currencyService = CryptoCompareService.RetrofitClientInstance
-                .getRetrofitInstance(new TypeToken<List<Currency>>() {}.getType(), new CurrencyDeserializer())
-                .create(CryptoCompareService.class);
-
-        CryptoCompareService valueService = CryptoCompareService.RetrofitClientInstance
-                .getRetrofitInstance(Value.class, new ValueDeserializer())
-                .create(CryptoCompareService.class);
-
-
         List<String> currenciesId = getAllCurrencyId();
+        if (currenciesId.size() == portfolio.getValue().size()) {
+            return portfolio;
+        }
+
+        CryptoCompareService currencyService = CryptoCompareService.Client.getService(
+                new TypeToken<List<Currency>>() {}.getType(), new CurrencyDeserializer());
+        CryptoCompareService valueService = CryptoCompareService.Client.getService(Value.class, new ValueDeserializer());
+
         for (String id : currenciesId) {
             getCurrencyById(id, currencyService, valueService);
         }
@@ -57,7 +65,9 @@ public class PortfolioRepository {
         call.enqueue(new Callback<List<Currency>>() {
             @Override
             public void onResponse(Call<List<Currency>> call, Response<List<Currency>> response) {
-                getCurrencyValue(response.body().get(0), valueService); // FIXME: Chain better
+                Currency currency = response.body().get(0);
+                currency.setInPortfolio(true);
+                getCurrencyValue(currency, valueService); // FIXME: Chain better
             }
 
             @Override
@@ -75,6 +85,7 @@ public class PortfolioRepository {
             public void onResponse(Call<Value> call, Response<Value> response) {
                 currency.setValue(response.body());
                 portfolio.getValue().add(currency);
+                portfolio.setValue(portfolio.getValue());
             }
 
             @Override
@@ -84,27 +95,29 @@ public class PortfolioRepository {
         });
     }
 
-    // FIXME: split into two classes (api calls + sqlite)
+    // FIXME: split into two classes (api calls + sqlite(DAO?))
 
     public void insertCurrency(Currency currency) {
-        SQLiteDatabase db = database.getWritableDatabase();
+        if (currency.isInPortfolio()) {
+            return;
+        }
+        currency.setInPortfolio(true); // TODO: DELETE?
+        portfolio.getValue().add(currency);
+        portfolio.setValue(portfolio.getValue());
 
+        SQLiteDatabase db = database.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(Currency.FIELD_ID, currency.getId());
         db.insert(Currency.TABLE_NAME, null, cv);
     }
 
     public int deleteCurrency(Currency currency) {
+        currency.setInPortfolio(false); // TODO: DELETE?
+        portfolio.getValue().remove(currency);
+        portfolio.setValue(portfolio.getValue());
+
         SQLiteDatabase db = database.getReadableDatabase();
         return db.delete(Currency.TABLE_NAME, Currency.FIELD_ID + "=?", new String[] {currency.getId()});
-    }
-
-    @SuppressLint("Range")
-    public boolean isCurrencyInserted(Currency currency) {
-        SQLiteDatabase db = database.getReadableDatabase();
-        String query = String.format("SELECT * FROM %s WHERE %s = ?", Currency.TABLE_NAME, Currency.FIELD_ID);
-        Cursor cursor = db.rawQuery(query, new String[]{ String.valueOf(currency.getId())});
-        return cursor.moveToFirst();
     }
 
     @SuppressLint("Range")

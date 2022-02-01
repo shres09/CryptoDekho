@@ -4,5 +4,5 @@ import com.cryptowatch.models.Currency;
 
 public interface CurrencyClickListener {
     void onCurrencyClick(Currency currency);
-    void onPortfolioClick(Currency currency);
+    void onPortfolioClick(Currency currency, boolean checked);
 }

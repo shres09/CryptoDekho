@@ -29,9 +29,7 @@ public class CurrencyRepository {
     }
 
     public MutableLiveData<Currency> getCurrencyValue() {
-        CryptoCompareService valueService = CryptoCompareService.RetrofitClientInstance
-                .getRetrofitInstance(Value.class, new ValueDeserializer())
-                .create(CryptoCompareService.class);
+        CryptoCompareService valueService = CryptoCompareService.Client.getService(Value.class, new ValueDeserializer());
 
         Currency curr = currency.getValue();
         if (curr.getValue() != null) {
@@ -57,9 +55,8 @@ public class CurrencyRepository {
     }
 
     public MutableLiveData<List<Ohlc>> getOhlc(String currencyId, String type, int count) {
-        CryptoCompareService service = CryptoCompareService.RetrofitClientInstance
-                .getRetrofitInstance(new TypeToken<List<Ohlc>>() {}.getType(), new OhlcListDeserializer())
-                .create(CryptoCompareService.class);
+        CryptoCompareService service = CryptoCompareService.Client.getService(
+                new TypeToken<List<Ohlc>>() {}.getType(), new OhlcListDeserializer());
 
         Call<List<Ohlc>> call;
 

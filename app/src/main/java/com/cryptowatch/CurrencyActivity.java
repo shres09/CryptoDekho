@@ -1,8 +1,6 @@
-package com.cryptowatch.activities;
+package com.cryptowatch;
 
-import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -18,7 +16,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.cryptowatch.R;
 import com.cryptowatch.data.Database;
 import com.cryptowatch.models.Currency;
 import com.cryptowatch.models.Ohlc;
@@ -26,14 +23,13 @@ import com.cryptowatch.utilities.Constants;
 import com.cryptowatch.viewmodels.CurrencyViewModel;
 import com.cryptowatch.viewmodels.CurrencyViewModelFactory;
 import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
-import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,8 +52,8 @@ public class CurrencyActivity extends AppCompatActivity {
         viewModel = new ViewModelProvider(this, new CurrencyViewModelFactory(c, new Database(this)))
                 .get(CurrencyViewModel.class);
         viewModel.getCurrency().observe(this, currency -> {
-            renderInfo(currency);
             initConversion(currency);
+            renderInfo(currency);
         });
         viewModel.getOhlc().observe(this, ohlc -> renderChart(ohlc));
         renderChipGroup();
@@ -70,25 +66,20 @@ public class CurrencyActivity extends AppCompatActivity {
         CheckBox btnPortfolio = portfolioItem.getActionView().findViewById(R.id.checkBox);
         Currency currency = viewModel.getCurrency().getValue();
         btnPortfolio.setChecked(viewModel.isInPortfolio(currency));
-        // FIXME: Use isChecked variable
-        btnPortfolio.setOnCheckedChangeListener((v, isChecked) -> viewModel.handlePortfolioChange(currency));
+        btnPortfolio.setOnCheckedChangeListener((v, isChecked) -> viewModel.handlePortfolioChange(currency, isChecked));
         return true;
     }
 
     private void renderInfo(Currency currency) {
         getSupportActionBar().setTitle(currency.getId());
 
-        Bitmap bitmap = currency.getImage();
-        if (bitmap != null) {
-            // FIXME:
-            getSupportActionBar().setLogo(new BitmapDrawable(this.getResources(), bitmap));
-            ImageView image = findViewById(R.id.imageLogo);
-            image.setImageBitmap(bitmap);
-        }
+        ImageView image = findViewById(R.id.imageLogo);
+        Picasso.get().load(Constants.CURRENCY_LOGO_SOURCE + currency.getImage()).into(image);
 
         TextView labelName = findViewById(R.id.labelDetailName);
         TextView labelConversionCurrency = findViewById(R.id.labelConversionCurrency);
 
+        EditText inputSource = findViewById(R.id.inputSource);
         TextView labelPrice = findViewById(R.id.labelDetailPrice);
         TextView labelMarketCap = findViewById(R.id.labelDetailMarketCap);
         TextView labelSupply = findViewById(R.id.labelSupply);
@@ -106,6 +97,7 @@ public class CurrencyActivity extends AppCompatActivity {
             return;
         }
 
+        inputSource.setText("1.00");
         labelPrice.setText(currency.getValue().getPrice());
         labelMarketCap.setText(currency.getValue().getMarketCap());
         labelSupply.setText(currency.getValue().getSupply());
@@ -126,7 +118,7 @@ public class CurrencyActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (!inputSourceFocus) {
+                if (!inputSourceFocus && inputTargetFocus) {
                     return;
                 }
 
@@ -190,25 +182,17 @@ public class CurrencyActivity extends AppCompatActivity {
         chart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
             @Override
             public void onValueSelected(Entry e, Highlight h) {
+                // TODO: implement logic here
                 Log.i("I", e.getX() + " " + e.getY());
             }
 
             @Override
-            public void onNothingSelected() {
-
-            }
+            public void onNothingSelected() { }
         });
-
-        YAxis yAxis = chart.getAxisLeft();
-        // yAxis.setGridColor(Color.BLACK);
-
-        // chart.setTouchEnabled(false);
-        // TODO: set highlighting
-
 
         List<Entry> entries = new ArrayList<>();
         for (Ohlc o : ohlc) {
-            entries.add(new Entry(o.getTime(), (float) o.getClose())); // FIXME: change all to float?
+            entries.add(new Entry(o.getTime(), (float) o.getClose()));
         }
 
         LineDataSet dataSet = new LineDataSet(entries, "SOME TEXT");
@@ -231,30 +215,26 @@ public class CurrencyActivity extends AppCompatActivity {
     private void renderChipGroup() {
         ChipGroup chipGroup = findViewById(R.id.chipGroup);
         chipGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            Chip chip = chipGroup.findViewById(checkedId);
-            String text = chip.getText().toString();
-            // FIXME: use id instead of text
-            switch (text) {
-                // FIXME: static string
-                case "1H":
+            switch (checkedId) {
+                case R.id.chip1h:
                     viewModel.fetchOhlc("minute", 60);
                     break;
-                case "24H":
+                case R.id.chip24h:
                     viewModel.fetchOhlc("hourly", 24);
                     break;
-                case "7D":
+                case R.id.chip7d:
                     viewModel.fetchOhlc("hourly", 168);
                     break;
-                case "1M":
+                case R.id.chip1m:
                     viewModel.fetchOhlc("daily", 30);
                     break;
-                case "3M":
+                case R.id.chip3m:
                     viewModel.fetchOhlc("daily", 90);
                     break;
-                case "1Y":
+                case R.id.chip1y:
                     viewModel.fetchOhlc("daily", 365);
                     break;
-                case "MAX":
+                case R.id.chipMax:
                     viewModel.fetchOhlc("daily", 2000);
                     break;
             }

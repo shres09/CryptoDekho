@@ -36,7 +36,6 @@ public class CurrencyMarketDeserializer implements JsonDeserializer<List<Currenc
                     (coinInfo.get("ImageUrl") != null
                             ? coinInfo.get("ImageUrl").getAsString()
                             : null),
-                    null,
                     new Value(
                             rawValue.get("PRICE").getAsDouble(),
                             value.get("PRICE").getAsString(),

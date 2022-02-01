@@ -18,13 +18,15 @@ public class CurrencyViewModel extends ViewModel {
 
     private MutableLiveData<Currency> currency;
     private MutableLiveData<List<Ohlc>> ohlc;
+    private MutableLiveData<List<Currency>> portfolio;
 
     public CurrencyViewModel(Currency currency, Database database) {
         this.currencyRepository = new CurrencyRepository(currency);
-        this.portfolioRepository = new PortfolioRepository(database);
+        this.portfolioRepository = PortfolioRepository.getInstance(database);
 
         this.currency = currencyRepository.getCurrencyValue();
         this.ohlc = currencyRepository.getOhlc(currency.getId(), "hourly", 24);
+        this.portfolio = portfolioRepository.getCurrenciesFromPortfolio();
     }
 
     public LiveData<Currency> getCurrency() {
@@ -39,28 +41,24 @@ public class CurrencyViewModel extends ViewModel {
         currencyRepository.getOhlc(currency.getValue().getId(), type, count);
     }
 
-
-    // FIXME: refactor this methods on all places
-    public void handlePortfolioChange(Currency currency) {
-        if (!isInPortfolio(currency)) {
-            addToPortfolio(currency);
+    public void handlePortfolioChange(Currency currency, boolean inPortfolio) {
+        if (inPortfolio) {
+            portfolioRepository.insertCurrency(currency);
         }
         else {
-            removeFromPortfolio(currency);
+            portfolioRepository.deleteCurrency(currency);
         }
+        // TODO: refresh
     }
 
+    // TODO: move to repository?
     public boolean isInPortfolio(Currency currency) {
-        return portfolioRepository.isCurrencyInserted(currency);
-    }
+        if (portfolio.getValue() == null) {
+            return false;
+        }
 
-    public void addToPortfolio(Currency currency) {
-        portfolioRepository.insertCurrency(currency);
-        currency.setInPortfolio(true);
-    }
-
-    public void removeFromPortfolio(Currency currency) {
-        portfolioRepository.deleteCurrency(currency);
-        currency.setInPortfolio(false);
+        return portfolio.getValue()
+                .stream()
+                .anyMatch(c -> c.getId().equals(currency.getId()));
     }
 }

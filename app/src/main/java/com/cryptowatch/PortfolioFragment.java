@@ -1,4 +1,4 @@
-package com.cryptowatch.fragments;
+package com.cryptowatch;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,8 +11,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.cryptowatch.R;
-import com.cryptowatch.activities.CurrencyActivity;
 import com.cryptowatch.adapters.CurrencyRecyclerViewAdapter;
 import com.cryptowatch.interfaces.CurrencyClickListener;
 import com.cryptowatch.models.Currency;
@@ -56,9 +54,8 @@ public class PortfolioFragment extends Fragment implements CurrencyClickListener
         intent.putExtra(CurrencyActivity.CURRENCY_INTENT_KEY, currency);
         startActivity(intent);
     }
-
     @Override
-    public void onPortfolioClick(Currency currency) {
-        viewModel.handlePortfolioChange(currency);
+    public void onPortfolioClick(Currency currency, boolean checked) {
+        viewModel.handlePortfolioChange(currency, checked);
     }
 }

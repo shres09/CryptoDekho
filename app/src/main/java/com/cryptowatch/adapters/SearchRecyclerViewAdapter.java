@@ -79,7 +79,7 @@ public class SearchRecyclerViewAdapter
     public void onBindViewHolder(@NonNull SearchViewHolder holder, int position) {
         Currency currency = filteredList.get(position);
 
-        Picasso.get().load(Constants.CURRENCY_LOGO_SOURCE + currency.getImageUrl()).into(holder);
+        Picasso.get().load(Constants.CURRENCY_LOGO_SOURCE + currency.getImage()).into(holder);
         holder.id.setText(currency.getId());
         holder.name.setText(currency.getName());
     }
@@ -112,8 +112,6 @@ public class SearchRecyclerViewAdapter
         @Override
         public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
             logo.setImageBitmap(bitmap);
-            Currency currency = filteredList.get(getAdapterPosition());
-            currency.setImage(bitmap);
         }
 
         @Override

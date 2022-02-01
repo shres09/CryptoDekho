@@ -21,9 +21,8 @@ public class ListRepository {
     public MutableLiveData<List<Currency>> getAllCurrencies() {
         MutableLiveData<List<Currency>> data = new MutableLiveData<>();
 
-        CryptoCompareService service = CryptoCompareService.RetrofitClientInstance
-                .getRetrofitInstance(new TypeToken<List<Currency>>() {}.getType(), new CurrencyDeserializer()) // FIXME: rename
-                .create(CryptoCompareService.class);
+        CryptoCompareService service = CryptoCompareService.Client.getService(
+                new TypeToken<List<Currency>>() {}.getType(), new CurrencyDeserializer());
 
         Call<List<Currency>> call = service.getAllCurrencySummary();
 
@@ -45,9 +44,8 @@ public class ListRepository {
     public MutableLiveData<List<Currency>> getCurrenciesByTopList() {
         MutableLiveData<List<Currency>> data = new MutableLiveData<>();
 
-        CryptoCompareService service = CryptoCompareService.RetrofitClientInstance
-                .getRetrofitInstance(new TypeToken<List<Currency>>() {}.getType(), new CurrencyMarketDeserializer())
-                .create(CryptoCompareService.class);
+        CryptoCompareService service = CryptoCompareService.Client.getService(
+                new TypeToken<List<Currency>>() {}.getType(), new CurrencyMarketDeserializer());
 
         Call<List<Currency>> call = service.getToplistByMarketCap(Constants.CONVERSION_CURRENCY, Constants.MARKET_COUNT);
 

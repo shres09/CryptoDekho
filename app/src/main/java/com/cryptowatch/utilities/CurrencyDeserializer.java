@@ -36,7 +36,6 @@ public class CurrencyDeserializer implements JsonDeserializer<List<Currency>> {
                             ? currency.get("ImageUrl").getAsString()
                             : null),
                     null,
-                    null,
                     false
             ));
         }

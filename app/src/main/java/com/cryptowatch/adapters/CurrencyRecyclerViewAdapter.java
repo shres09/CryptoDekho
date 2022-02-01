@@ -47,7 +47,7 @@ public class CurrencyRecyclerViewAdapter extends RecyclerView.Adapter<CurrencyRe
     public void onBindViewHolder(@NonNull CurrencyViewHolder holder, int position) {
         Currency currency = list.get(position);
 
-        Picasso.get().load(Constants.CURRENCY_LOGO_SOURCE + currency.getImageUrl()).into(holder);
+        Picasso.get().load(Constants.CURRENCY_LOGO_SOURCE + currency.getImage()).into(holder);
         holder.id.setText(currency.getId());
         holder.name.setText(currency.getName());
         holder.price.setText(currency.getValue().getPrice());
@@ -89,8 +89,6 @@ public class CurrencyRecyclerViewAdapter extends RecyclerView.Adapter<CurrencyRe
         @Override
         public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
             logo.setImageBitmap(bitmap);
-            Currency currency = list.get(getAdapterPosition());
-            currency.setImage(bitmap);
         }
 
         @Override
@@ -109,9 +107,10 @@ public class CurrencyRecyclerViewAdapter extends RecyclerView.Adapter<CurrencyRe
         }
 
         public void setupPortfolioClick(CheckBox portfolio) {
-            portfolio.setOnClickListener(v -> {
+            portfolio.setOnClickListener((view) -> {
                 Currency currency = list.get(getAdapterPosition());
-                clickListener.onPortfolioClick(currency);
+                boolean isChecked = ((CheckBox) view).isChecked();
+                clickListener.onPortfolioClick(currency, isChecked);
             });
         }
     }

@@ -1,6 +1,5 @@
 package com.cryptowatch.models;
 
-import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -10,8 +9,7 @@ public class Currency implements Parcelable {
 
     private String id;
     private String name;
-    private String imageUrl;
-    private Bitmap image;
+    private String image;
     private Value value;
     private boolean isInPortfolio;
 
@@ -19,10 +17,9 @@ public class Currency implements Parcelable {
 
     }
 
-    public Currency(String id, String name, String imageUrl, Bitmap image, Value value, boolean isInPortfolio) {
+    public Currency(String id, String name, String image, Value value, boolean isInPortfolio) {
         this.id = id;
         this.name = name;
-        this.imageUrl = imageUrl;
         this.image = image;
         this.value = value;
         this.isInPortfolio = isInPortfolio;
@@ -31,8 +28,7 @@ public class Currency implements Parcelable {
     protected Currency(Parcel in) {
         id = in.readString();
         name = in.readString();
-        imageUrl = in.readString();
-        image = in.readParcelable(Bitmap.class.getClassLoader());
+        image = in.readString();
         value = in.readParcelable(Value.class.getClassLoader());
         isInPortfolio = in.readByte() != 0;
     }
@@ -65,19 +61,11 @@ public class Currency implements Parcelable {
         this.name = name;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
-    public Bitmap getImage() {
+    public String getImage() {
         return image;
     }
 
-    public void setImage(Bitmap image) {
+    public void setImage(String image) {
         this.image = image;
     }
 
@@ -98,6 +86,14 @@ public class Currency implements Parcelable {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Currency currency = (Currency) o;
+        return id.equals(currency.id);
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -106,8 +102,7 @@ public class Currency implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(id);
         dest.writeString(name);
-        dest.writeString(imageUrl);
-        dest.writeParcelable(image, flags);
+        dest.writeString(image);
         dest.writeParcelable(value, flags);
         dest.writeByte((byte) (isInPortfolio ? 1 : 0));
     }

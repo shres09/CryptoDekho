@@ -1,4 +1,4 @@
-package com.cryptowatch.fragments;
+package com.cryptowatch;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -12,7 +12,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.cryptowatch.R;
 import com.cryptowatch.adapters.NewsRecyclerViewAdapter;
 import com.cryptowatch.interfaces.NewsClickListener;
 import com.cryptowatch.models.NewsArticle;

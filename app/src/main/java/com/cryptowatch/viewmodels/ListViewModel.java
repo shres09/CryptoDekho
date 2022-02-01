@@ -24,7 +24,7 @@ public class ListViewModel extends ViewModel {
 
     public ListViewModel(Database database) {
         this.listRepository = new ListRepository();
-        this.portfolioRepository = new PortfolioRepository(database);
+        this.portfolioRepository = PortfolioRepository.getInstance(database);
 
         this.currencies = listRepository.getAllCurrencies();
         this.market = listRepository.getCurrenciesByTopList();
@@ -62,43 +62,43 @@ public class ListViewModel extends ViewModel {
         search.setValue(list);
     }
 
-//    public void validateMarketDataInPortfolio() {
-//        List<String> currenciesId = portfolioRepository.getAllCurrencyId();
-//        market.getValue().stream().forEach(
-//                currency -> {
-//                    if (currenciesId.contains(currency.getId())) {
-//                        currency.setInPortfolio(true);
-//                    }
-//                }
-//        );
-//        market.setValue(market.getValue());
-//    }
+    public void checkMarketInPortfolio() {
+        if (market.getValue() == null || portfolio.getValue() == null) {
+            return;
+        }
 
-    public void handlePortfolioChange(Currency currency) {
-        if (!isInPortfolio(currency)) {
-            addToPortfolio(currency);
+        List<String> currenciesId = portfolio.getValue()
+                .stream()
+                .map(Currency::getId)
+                .collect(Collectors.toList());
+
+        market.getValue().forEach(
+                currency -> {
+                    if (currenciesId.contains(currency.getId())) {
+                        currency.setInPortfolio(true);
+                    }
+                }
+        );
+    }
+
+    public void handlePortfolioChange(Currency currency, boolean inPortfolio) {
+        if (inPortfolio) {
+            portfolioRepository.insertCurrency(currency);
         }
         else {
-            removeFromPortfolio(currency);
+            portfolioRepository.deleteCurrency(currency);
         }
-
-        // market.setValue(portfolio.getValue());
-        // portfolio.setValue(portfolio.getValue());
+        // TODO: refresh
     }
 
-    public boolean isInPortfolio(Currency currency) {
-        return portfolioRepository.isCurrencyInserted(currency);
-    }
-
-    public void addToPortfolio(Currency currency) {
-        portfolioRepository.insertCurrency(currency);
-        currency.setInPortfolio(true);
-        // portfolio.getValue().add(currency);
-    }
-
-    public void removeFromPortfolio(Currency currency) {
-        portfolioRepository.deleteCurrency(currency);
-        currency.setInPortfolio(false);
-        // portfolio.getValue().remove(currency);
-    }
+//    // TODO: move to repository?
+//    public boolean isInPortfolio(Currency currency) {
+//        if (portfolio.getValue() == null) {
+//            return false;
+//        }
+//
+//        return portfolio.getValue()
+//                .stream()
+//                .anyMatch(c -> c.getId().equals(currency.getId()));
+//    }
 }
