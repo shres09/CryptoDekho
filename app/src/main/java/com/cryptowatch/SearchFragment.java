@@ -54,6 +54,7 @@ public class SearchFragment extends Fragment implements CurrencyClickListener {
             adapter = new SearchRecyclerViewAdapter(getContext(), data, this);
             recyclerView.setAdapter(adapter);
         });
+        viewModel.setSearch("");
         return view;
     }
 

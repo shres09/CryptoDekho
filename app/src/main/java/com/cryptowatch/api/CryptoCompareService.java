@@ -18,15 +18,11 @@ import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 public interface CryptoCompareService {
-    // FIXME: maybe first and third method can be merged
     @GET("all/coinlist?summary=true")
     Call<List<Currency>> getCurrencySummary(@Query("fsym") String id);
 
     @GET("pricemultifull")
     Call<Value> getCurrencyValue(@Query("fsyms") String id, @Query("tsyms") String conversionCurrency);
-
-    @GET("all/coinlist?summary=true")
-    Call<List<Currency>> getAllCurrencySummary();
 
     @GET("top/mktcapfull")
     Call<List<Currency>> getToplistByMarketCap(@Query("tsym") String conversionCurrency, @Query("limit") int count);

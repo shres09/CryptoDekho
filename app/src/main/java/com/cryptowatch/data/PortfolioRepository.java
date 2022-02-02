@@ -23,7 +23,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-// TODO: do I need thread safe Singleton?
 public class PortfolioRepository {
     private static PortfolioRepository instance;
 
@@ -67,12 +66,12 @@ public class PortfolioRepository {
             public void onResponse(Call<List<Currency>> call, Response<List<Currency>> response) {
                 Currency currency = response.body().get(0);
                 currency.setInPortfolio(true);
-                getCurrencyValue(currency, valueService); // FIXME: Chain better
+                getCurrencyValue(currency, valueService);
             }
 
             @Override
             public void onFailure(Call<List<Currency>> call, Throwable t) {
-                Log.d("getCurrencyById", t.getMessage());
+                Log.d("getCurrencySummary", t.getMessage());
             }
         });
     }
@@ -95,13 +94,11 @@ public class PortfolioRepository {
         });
     }
 
-    // FIXME: split into two classes (api calls + sqlite(DAO?))
-
     public void insertCurrency(Currency currency) {
         if (currency.isInPortfolio()) {
             return;
         }
-        currency.setInPortfolio(true); // TODO: DELETE?
+        currency.setInPortfolio(true);
         portfolio.getValue().add(currency);
         portfolio.setValue(portfolio.getValue());
 
@@ -112,7 +109,7 @@ public class PortfolioRepository {
     }
 
     public int deleteCurrency(Currency currency) {
-        currency.setInPortfolio(false); // TODO: DELETE?
+        currency.setInPortfolio(false);
         portfolio.getValue().remove(currency);
         portfolio.setValue(portfolio.getValue());
 

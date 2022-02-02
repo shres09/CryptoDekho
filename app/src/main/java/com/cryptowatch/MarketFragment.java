@@ -47,23 +47,25 @@ public class MarketFragment extends Fragment implements CurrencyClickListener {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         viewModel.getMarket().observe(getViewLifecycleOwner(), data -> {
             adapter = new CurrencyRecyclerViewAdapter(getContext(), data, this);
-//            data.stream().forEach(currency -> {
-//                if (viewModel.isInPortfolio(currency)) {
-//                    currency.setInPortfolio(true);
-//                }
-//            });
-            // TODO: test
             viewModel.checkMarketInPortfolio();
             adapter.notifyDataSetChanged();
             recyclerView.setAdapter(adapter);
         });
-        viewModel.getPortfolio().observe(getViewLifecycleOwner(), data -> {
-            viewModel.checkMarketInPortfolio();
-            if (adapter != null) {
-                adapter.notifyDataSetChanged();
-            }
-        });
+        viewModel.getPortfolio().observe(getViewLifecycleOwner(), data -> refreshView());
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        refreshView();
+    }
+
+    private void refreshView() {
+        viewModel.checkMarketInPortfolio();
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
     }
 
     @Override

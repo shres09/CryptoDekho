@@ -1,17 +1,19 @@
 package com.cryptowatch;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
@@ -20,13 +22,17 @@ import com.cryptowatch.data.Database;
 import com.cryptowatch.models.Currency;
 import com.cryptowatch.models.Ohlc;
 import com.cryptowatch.utilities.Constants;
+import com.cryptowatch.utilities.Formatter;
 import com.cryptowatch.viewmodels.CurrencyViewModel;
 import com.cryptowatch.viewmodels.CurrencyViewModelFactory;
+import com.cryptowatch.views.LockableScrollView;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.listener.ChartTouchListener;
+import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.google.android.material.chip.ChipGroup;
 import com.squareup.picasso.Picasso;
@@ -34,11 +40,13 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
-// FIXME: refactor whole class
 public class CurrencyActivity extends AppCompatActivity {
     public static String CURRENCY_INTENT_KEY = "currency";
 
     private CurrencyViewModel viewModel;
+
+    private TextView labelName;
+    private TextView labelPrice;
     private boolean inputSourceFocus;
     private boolean inputTargetFocus;
 
@@ -46,17 +54,17 @@ public class CurrencyActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_currency);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true); // FIXME: returns on wrong fragment
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         Currency c = getIntent().getParcelableExtra(CURRENCY_INTENT_KEY);
         viewModel = new ViewModelProvider(this, new CurrencyViewModelFactory(c, new Database(this)))
                 .get(CurrencyViewModel.class);
         viewModel.getCurrency().observe(this, currency -> {
             initConversion(currency);
-            renderInfo(currency);
+            initInfo(currency);
         });
-        viewModel.getOhlc().observe(this, ohlc -> renderChart(ohlc));
-        renderChipGroup();
+        viewModel.getOhlc().observe(this, ohlc -> initChart(ohlc));
+        initChipGroup();
     }
 
     @Override
@@ -70,17 +78,26 @@ public class CurrencyActivity extends AppCompatActivity {
         return true;
     }
 
-    private void renderInfo(Currency currency) {
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();;
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void initInfo(Currency currency) {
         getSupportActionBar().setTitle(currency.getId());
 
         ImageView image = findViewById(R.id.imageLogo);
         Picasso.get().load(Constants.CURRENCY_LOGO_SOURCE + currency.getImage()).into(image);
 
-        TextView labelName = findViewById(R.id.labelDetailName);
-        TextView labelConversionCurrency = findViewById(R.id.labelConversionCurrency);
+        labelName = findViewById(R.id.labelDetailName);
+        labelPrice = findViewById(R.id.labelDetailPrice);
 
+        TextView labelConversionCurrency = findViewById(R.id.labelConversionCurrency);
         EditText inputSource = findViewById(R.id.inputSource);
-        TextView labelPrice = findViewById(R.id.labelDetailPrice);
         TextView labelMarketCap = findViewById(R.id.labelDetailMarketCap);
         TextView labelSupply = findViewById(R.id.labelSupply);
         TextView label1hChange = findViewById(R.id.label1hChange);
@@ -92,20 +109,17 @@ public class CurrencyActivity extends AppCompatActivity {
         labelName.setText(currency.getName());
         labelConversionCurrency.setText(Constants.CONVERSION_CURRENCY);
 
-        // FIXME: XD
-        if (currency.getValue() == null) {
-            return;
+        if (currency.getValue() != null) {
+            inputSource.setText("1.00");
+            labelPrice.setText(currency.getValue().getPrice());
+            labelMarketCap.setText(currency.getValue().getMarketCap());
+            labelSupply.setText(currency.getValue().getSupply());
+            label1hChange.setText(currency.getValue().getChange1H());
+            label24hChange.setText(currency.getValue().getChange24H());
+            label24hVolume.setText(currency.getValue().getVolume24H());
+            label24hHigh.setText(currency.getValue().getHigh24H());
+            label24hLow.setText(currency.getValue().getLow24H());
         }
-
-        inputSource.setText("1.00");
-        labelPrice.setText(currency.getValue().getPrice());
-        labelMarketCap.setText(currency.getValue().getMarketCap());
-        labelSupply.setText(currency.getValue().getSupply());
-        label1hChange.setText(currency.getValue().getChange1H());
-        label24hChange.setText(currency.getValue().getChange24H());
-        label24hVolume.setText(currency.getValue().getVolume24H());
-        label24hHigh.setText(currency.getValue().getHigh24H());
-        label24hLow.setText(currency.getValue().getLow24H());
     }
 
     private void initConversion(Currency currency) {
@@ -113,9 +127,6 @@ public class CurrencyActivity extends AppCompatActivity {
         EditText inputTarget = findViewById(R.id.inputTarget);
 
         inputSource.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (!inputSourceFocus && inputTargetFocus) {
@@ -131,14 +142,11 @@ public class CurrencyActivity extends AppCompatActivity {
                 }
             }
 
-            @Override
-            public void afterTextChanged(Editable s) { }
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            @Override public void afterTextChanged(Editable s) { }
         });
 
         inputTarget.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (!inputTargetFocus) {
@@ -154,27 +162,22 @@ public class CurrencyActivity extends AppCompatActivity {
                 }
             }
 
-            @Override
-            public void afterTextChanged(Editable s) { }
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            @Override public void afterTextChanged(Editable s) { }
         });
 
-        inputSource.setOnFocusChangeListener((view, focus) -> {
-            inputSourceFocus = focus;
-        });
-
-        inputTarget.setOnFocusChangeListener((view, focus) -> {
-            inputTargetFocus = focus;
-        });
+        inputSource.setOnFocusChangeListener((view, focus) -> inputSourceFocus = focus);
+        inputTarget.setOnFocusChangeListener((view, focus) -> inputTargetFocus = focus);
     }
 
-    private void renderChart(List<Ohlc> ohlc) {
+    private void initChart(List<Ohlc> ohlc) {
+        LockableScrollView scrollView = findViewById(R.id.scrollView);
+
         LineChart chart = findViewById(R.id.lineChart);
         chart.getDescription().setEnabled(false);
         chart.getLegend().setEnabled(false);
         chart.getXAxis().setEnabled(false);
         chart.getAxisRight().setEnabled(false);
-
-        chart.setDragEnabled(false);
         chart.setScaleEnabled(false);
         chart.setPinchZoom(false);
         chart.setDoubleTapToZoomEnabled(false);
@@ -182,12 +185,39 @@ public class CurrencyActivity extends AppCompatActivity {
         chart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
             @Override
             public void onValueSelected(Entry e, Highlight h) {
-                // TODO: implement logic here
-                Log.i("I", e.getX() + " " + e.getY());
+                scrollView.setScrollable(false);
+                labelName.setText(Formatter.formatDate((long) e.getX()));
+                labelPrice.setText(Formatter.formatPrice(e.getY()));
+            }
+
+            @Override public void onNothingSelected() { }
+        });
+
+        chart.setOnChartGestureListener(new OnChartGestureListener() {
+            @Override
+            public void onChartGestureStart(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {
+                scrollView.setScrollable(false);
+                Highlight highlight = chart.getHighlightByTouchPoint(me.getX(), me.getY());
+                chart.highlightValue(highlight);
+                labelName.setText(Formatter.formatDate((long) highlight.getX()));
+                labelPrice.setText(Formatter.formatPrice(highlight.getY()));
             }
 
             @Override
-            public void onNothingSelected() { }
+            public void onChartGestureEnd(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {
+                scrollView.setScrollable(true);
+                chart.highlightValues(null);
+                Currency currency = viewModel.getCurrency().getValue();
+                labelName.setText(currency.getName());
+                labelPrice.setText(currency.getValue().getPrice());
+            }
+
+            @Override public void onChartLongPressed(MotionEvent me) { }
+            @Override public void onChartDoubleTapped(MotionEvent me) { }
+            @Override public void onChartSingleTapped(MotionEvent me) { }
+            @Override public void onChartFling(MotionEvent me1, MotionEvent me2, float velocityX, float velocityY) { }
+            @Override public void onChartScale(MotionEvent me, float scaleX, float scaleY) { }
+            @Override public void onChartTranslate(MotionEvent me, float dX, float dY) { }
         });
 
         List<Entry> entries = new ArrayList<>();
@@ -204,15 +234,18 @@ public class CurrencyActivity extends AppCompatActivity {
         dataSet.setFillDrawable(ContextCompat.getDrawable(this, R.drawable.chart_gradient));
 
         dataSet.setHighlightEnabled(true);
-        dataSet.setDrawHighlightIndicators(true);
-        dataSet.setHighLightColor(Color.BLACK);
+        dataSet.setDrawHorizontalHighlightIndicator(false);
+        dataSet.setHighLightColor(Color.GRAY);
+        dataSet.setHighlightLineWidth(2);
+        dataSet.enableDashedHighlightLine(40, 20, 0);
 
         LineData lineData = new LineData(dataSet);
         chart.setData(lineData);
         chart.invalidate();
     }
 
-    private void renderChipGroup() {
+    @SuppressLint("NonConstantResourceId")
+    private void initChipGroup() {
         ChipGroup chipGroup = findViewById(R.id.chipGroup);
         chipGroup.setOnCheckedChangeListener((group, checkedId) -> {
             switch (checkedId) {

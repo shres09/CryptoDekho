@@ -24,7 +24,7 @@ public class ListRepository {
         CryptoCompareService service = CryptoCompareService.Client.getService(
                 new TypeToken<List<Currency>>() {}.getType(), new CurrencyDeserializer());
 
-        Call<List<Currency>> call = service.getAllCurrencySummary();
+        Call<List<Currency>> call = service.getCurrencySummary(null);
 
         call.enqueue(new Callback<List<Currency>>() {
             @Override
@@ -34,7 +34,7 @@ public class ListRepository {
 
             @Override
             public void onFailure(Call<List<Currency>> call, Throwable t) {
-                Log.d("getAllCurrencies", t.getMessage());
+                Log.d("getCurrencySummary", t.getMessage());
             }
         });
 
@@ -53,7 +53,6 @@ public class ListRepository {
             @Override
             public void onResponse(Call<List<Currency>> call, Response<List<Currency>> response) {
                 data.setValue(response.body());
-                // getPortfolio(); // FIXME: kinda ugly
             }
 
             @Override

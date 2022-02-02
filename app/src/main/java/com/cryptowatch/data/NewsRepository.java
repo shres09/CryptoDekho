@@ -33,8 +33,7 @@ public class NewsRepository {
 
             @Override
             public void onFailure(Call<List<NewsArticle>> call, Throwable t) {
-                Log.d("getCurrencies", t.getMessage());
-                // FIXME: static string
+                Log.d("getLatestNews", t.getMessage());
             }
         });
 

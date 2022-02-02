@@ -16,8 +16,8 @@ public class ValueDeserializer implements JsonDeserializer<Value> {
         JsonObject rawData = json.getAsJsonObject().getAsJsonObject("RAW");
         JsonObject data = json.getAsJsonObject().getAsJsonObject("DISPLAY");
 
-        JsonObject rawValue = getCurrencyObject(rawData, "EUR"); // FIXME: currency shouldn't be hardcoded
-        JsonObject value = getCurrencyObject(data, "EUR");
+        JsonObject rawValue = getCurrencyObject(rawData, Constants.CONVERSION_CURRENCY);
+        JsonObject value = getCurrencyObject(data, Constants.CONVERSION_CURRENCY);
 
         return new Value(
                 rawValue.get("PRICE").getAsDouble(),

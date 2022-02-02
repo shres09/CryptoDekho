@@ -48,10 +48,8 @@ public class CurrencyViewModel extends ViewModel {
         else {
             portfolioRepository.deleteCurrency(currency);
         }
-        // TODO: refresh
     }
 
-    // TODO: move to repository?
     public boolean isInPortfolio(Currency currency) {
         if (portfolio.getValue() == null) {
             return false;

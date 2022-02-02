@@ -32,10 +32,6 @@ public class ListViewModel extends ViewModel {
         this.search = new MutableLiveData<>(new ArrayList<>());
     }
 
-    public LiveData<List<Currency>> getCurrencies() {
-        return currencies;
-    }
-
     public LiveData<List<Currency>> getMarket() {
         return market;
     }
@@ -46,6 +42,29 @@ public class ListViewModel extends ViewModel {
 
     public LiveData<List<Currency>> getSearch() {
         return search;
+    }
+
+    public void checkMarketInPortfolio() {
+        if (market.getValue() == null || portfolio.getValue() == null) {
+            return;
+        }
+
+        List<String> currenciesId = portfolio.getValue()
+                .stream()
+                .map(Currency::getId)
+                .collect(Collectors.toList());
+
+        market.getValue().forEach(
+                currency -> currency.setInPortfolio(currenciesId.contains(currency.getId())));
+    }
+
+    public void handlePortfolioChange(Currency currency, boolean inPortfolio) {
+        if (inPortfolio) {
+            portfolioRepository.insertCurrency(currency);
+        }
+        else {
+            portfolioRepository.deleteCurrency(currency);
+        }
     }
 
     public void setSearch(String query) {
@@ -61,44 +80,4 @@ public class ListViewModel extends ViewModel {
 
         search.setValue(list);
     }
-
-    public void checkMarketInPortfolio() {
-        if (market.getValue() == null || portfolio.getValue() == null) {
-            return;
-        }
-
-        List<String> currenciesId = portfolio.getValue()
-                .stream()
-                .map(Currency::getId)
-                .collect(Collectors.toList());
-
-        market.getValue().forEach(
-                currency -> {
-                    if (currenciesId.contains(currency.getId())) {
-                        currency.setInPortfolio(true);
-                    }
-                }
-        );
-    }
-
-    public void handlePortfolioChange(Currency currency, boolean inPortfolio) {
-        if (inPortfolio) {
-            portfolioRepository.insertCurrency(currency);
-        }
-        else {
-            portfolioRepository.deleteCurrency(currency);
-        }
-        // TODO: refresh
-    }
-
-//    // TODO: move to repository?
-//    public boolean isInPortfolio(Currency currency) {
-//        if (portfolio.getValue() == null) {
-//            return false;
-//        }
-//
-//        return portfolio.getValue()
-//                .stream()
-//                .anyMatch(c -> c.getId().equals(currency.getId()));
-//    }
 }

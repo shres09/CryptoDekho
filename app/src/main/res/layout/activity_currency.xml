@@ -8,7 +8,8 @@
     android:orientation="vertical"
     tools:context=".CurrencyActivity">
 
-    <ScrollView
+    <com.cryptowatch.views.LockableScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -126,14 +127,14 @@
             <com.github.mikephil.charting.charts.LineChart
                 android:id="@+id/lineChart"
                 android:layout_width="match_parent"
-                android:layout_height="250dp" >
+                android:layout_height="250dp">
 
             </com.github.mikephil.charting.charts.LineChart>
 
             <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginBottom="20dp">
+                android:layout_marginBottom="40dp">
 
                 <com.google.android.material.chip.ChipGroup
                     android:id="@+id/chipGroup"
@@ -401,6 +402,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
-    </ScrollView>
+    </com.cryptowatch.views.LockableScrollView>
 
 </LinearLayout>

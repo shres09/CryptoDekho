@@ -11,8 +11,6 @@ import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class HomeActivity extends AppCompatActivity {
-    private NavController nvc;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,7 +22,7 @@ public class HomeActivity extends AppCompatActivity {
         BottomNavigationView nav = findViewById(R.id.navbar);
         AppBarConfiguration abc = new AppBarConfiguration.Builder(R.id.market, R.id.portfolio, R.id.search, R.id.news).build();
         NavHostFragment nhf = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.navFragment);
-        nvc = nhf.getNavController();
+        NavController nvc = nhf.getNavController();
         NavigationUI.setupActionBarWithNavController(this, nvc, abc);
         NavigationUI.setupWithNavController(nav, nvc);
     }
