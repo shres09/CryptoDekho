@@ -2,21 +2,25 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/market">
+    app:startDestination="@id/profile">
+    <fragment
+        android:id="@+id/profile"
+        android:name="com.cryptodekho.app.Fragments.ProfileFragment"
+        android:label="@string/app_name" />
     <fragment
         android:id="@+id/market"
-        android:name="com.cryptowatch.app.MarketFragment"
+        android:name="com.cryptodekho.app.Fragments.MarketFragment"
         android:label="@string/app_name" />
     <fragment
         android:id="@+id/portfolio"
-        android:name="com.cryptowatch.app.PortfolioFragment"
+        android:name="com.cryptodekho.app.Fragments.PortfolioFragment"
         android:label="@string/app_name" />
     <fragment
         android:id="@+id/search"
-        android:name="com.cryptowatch.app.SearchFragment"
+        android:name="com.cryptodekho.app.Fragments.SearchFragment"
         android:label="@string/app_name" />
     <fragment
         android:id="@+id/news"
-        android:name="com.cryptowatch.app.NewsFragment"
+        android:name="com.cryptodekho.app.Fragments.NewsFragment"
         android:label="@string/app_name" />
 </navigation>
